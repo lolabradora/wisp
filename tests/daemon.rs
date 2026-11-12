@@ -1,5 +1,8 @@
 //! Drives the daemon over its unix socket with a fake llama-server behind it.
-#![expect(
+// `allow`, not `expect`: clippy 1.100 stopped flagging these in integration tests, and an
+// unfulfilled `expect` is an error there while older toolchains still need the exemption.
+#![allow(
+    clippy::allow_attributes,
     clippy::unwrap_used,
     clippy::panic,
     reason = "test helpers outside #[test] fns should fail loudly"
