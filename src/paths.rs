@@ -5,8 +5,14 @@ use std::path::{Path, PathBuf};
 
 use anyhow::Context as _;
 
-/// launchd label of the llama-server agent installed by `scripts/install-llama-service.sh`.
+/// launchd label of the llama-server agent that `wisp setup` installs on macOS.
 pub const LLAMA_AGENT: &str = "dev.wisp.llama-server";
+
+/// launchd label of the menu bar agent installed by `wisp setup --menubar`.
+pub const MENUBAR_AGENT: &str = "dev.wisp.menubar";
+
+/// systemd user unit that `wisp setup` installs on Linux.
+pub const LLAMA_UNIT: &str = "wisp-llama-server.service";
 
 /// A fixed per-user path, so every shell finds the same daemon even when tools such as
 /// nix-shell or direnv change `TMPDIR`.
@@ -15,7 +21,7 @@ pub const LLAMA_AGENT: &str = "dev.wisp.llama-server";
 ///
 /// Returns an error if `HOME` is not set.
 pub fn default_socket() -> anyhow::Result<PathBuf> {
-    Ok(home()?.join(".cache/wisp/wisp.sock"))
+    Ok(home().context("pass --socket explicitly")?.join(".cache/wisp/wisp.sock"))
 }
 
 /// While this file exists the daemon makes no suggestions.
@@ -51,15 +57,74 @@ pub fn daemon_log(socket: &Path) -> PathBuf {
     socket.with_extension("log")
 }
 
+/// The file launchd sends llama-server's output to. Only macOS has one; systemd keeps the
+/// output in the journal (see [`llama_log_hint`]).
+///
 /// # Errors
 ///
 /// Returns an error if `HOME` is not set.
+#[cfg(target_os = "macos")]
 pub fn llama_log() -> anyhow::Result<PathBuf> {
     Ok(home()?.join("Library/Logs/wisp-llama-server.log"))
 }
 
-fn home() -> anyhow::Result<PathBuf> {
-    std::env::home_dir().context("HOME is not set; pass --socket explicitly")
+/// Where to read llama-server's output, worded for messages: the log file on macOS, the
+/// `journalctl` command elsewhere.
+///
+/// # Errors
+///
+/// Returns an error if `HOME` is not set.
+pub fn llama_log_hint() -> anyhow::Result<String> {
+    #[cfg(target_os = "macos")]
+    let hint = llama_log()?.display().to_string();
+    #[cfg(not(target_os = "macos"))]
+    let hint = format!("journalctl --user -u {}", LLAMA_UNIT.trim_end_matches(".service"));
+    Ok(hint)
+}
+
+/// # Errors
+///
+/// Returns an error if `HOME` is not set.
+pub fn menubar_log() -> anyhow::Result<PathBuf> {
+    Ok(home()?.join("Library/Logs/wisp-menubar.log"))
+}
+
+/// The plist launchd reads for the agent `label`.
+///
+/// # Errors
+///
+/// Returns an error if `HOME` is not set.
+pub fn launch_agent(label: &str) -> anyhow::Result<PathBuf> {
+    Ok(home()?.join(format!("Library/LaunchAgents/{label}.plist")))
+}
+
+/// The unit file systemd reads for the llama-server user service.
+///
+/// # Errors
+///
+/// Returns an error if `HOME` is not set.
+pub fn systemd_unit() -> anyhow::Result<PathBuf> {
+    Ok(home()?.join(".config/systemd/user").join(LLAMA_UNIT))
+}
+
+/// The file zsh reads for interactive shells, where the `wisp init zsh` line belongs.
+///
+/// # Errors
+///
+/// Returns an error if neither `ZDOTDIR` nor `HOME` is set.
+pub fn zshrc() -> anyhow::Result<PathBuf> {
+    let dir = match std::env::var_os("ZDOTDIR").filter(|dir| !dir.is_empty()) {
+        Some(dir) => PathBuf::from(dir),
+        None => home()?,
+    };
+    Ok(dir.join(".zshrc"))
+}
+
+/// # Errors
+///
+/// Returns an error if `HOME` is not set.
+pub fn home() -> anyhow::Result<PathBuf> {
+    std::env::home_dir().context("HOME is not set")
 }
 
 #[cfg(test)]

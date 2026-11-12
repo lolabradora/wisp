@@ -12,3 +12,8 @@
 /.impeccable/comp-payload.json
 /.impeccable/briefs/
 /.impeccable/questions/
+
+# local tool state
+/.wrangler/
+/.gstack/
+/.impeccable/hook.cache.json

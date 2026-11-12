@@ -8,12 +8,13 @@ use tracing_subscriber::EnvFilter;
 use wisp::context::{Context, Sources};
 use wisp::daemon::{self, Config};
 use wisp::model::{HealedPrompt, LlamaClient};
-use wisp::{paths, status};
+use wisp::screen::Terminal;
+use wisp::service::ModelSize;
+use wisp::{doctor, paths, setup, status};
 
 const ZSH_PLUGIN: &str = include_str!("../shell/wisp.zsh");
-const DEBOUNCE: Duration = Duration::from_millis(60);
 
-/// AI ghost-text command suggestions for zsh.
+/// Ghost-text command suggestions for zsh from a local model that reads your terminal.
 #[derive(Parser)]
 #[command(version)]
 struct Cli {
@@ -29,8 +30,31 @@ enum Command {
         #[command(flatten)]
         socket: SocketArg,
     },
+    /// Download the model and keep llama-server running in the background. Run it again to
+    /// switch models.
+    Setup {
+        /// Qwen2.5-Coder size: 1.5b is faster, 3b suggests better.
+        #[arg(long, value_enum, default_value_t)]
+        model: ModelSize,
+        /// Port llama-server listens on, on 127.0.0.1.
+        #[arg(long, default_value_t = setup::DEFAULT_PORT)]
+        port: u16,
+        /// Also show the menu bar item at login (macOS).
+        #[arg(long)]
+        menubar: bool,
+    },
+    /// Remove the background services that `wisp setup` installed. Models and the binary stay.
+    Uninstall,
+    /// Check everything a suggestion depends on, with a fix for each problem.
+    Doctor(Endpoints),
     /// Run the daemon the shell plugin talks to. The plugin starts it on demand.
-    Daemon(Endpoints),
+    Daemon {
+        #[command(flatten)]
+        endpoints: Endpoints,
+        /// How long typing must pause before the model is asked, in milliseconds.
+        #[arg(long, env = "WISP_DEBOUNCE_MS", default_value_t = 60)]
+        debounce_ms: u64,
+    },
     /// Show whether llama-server and the daemon run, and the latest suggestions.
     Status {
         #[command(flatten)]
@@ -45,7 +69,7 @@ enum Command {
     Resume(SocketArg),
     /// Show wisp's status in the macOS menu bar.
     Menubar(Endpoints),
-    /// Suggest a completion for BUFFER from this directory and terminal pane, for debugging.
+    /// Suggest a completion for BUFFER from this directory and terminal, for debugging.
     Complete {
         buffer: String,
         /// Print the prompt sent to the model.
@@ -101,12 +125,12 @@ fn main() -> anyhow::Result<()> {
 
     match Cli::parse().command {
         // AppKit needs the main thread, so the menu bar runs outside the tokio runtime.
-        Command::Menubar(endpoints) => {
-            let (socket, model) = endpoints.resolve()?;
-            wisp::menubar::run(&socket, model)
-        }
+        Command::Menubar(endpoints) => run_menubar(endpoints),
         command @ (Command::Init { .. }
-        | Command::Daemon(_)
+        | Command::Setup { .. }
+        | Command::Uninstall
+        | Command::Doctor(_)
+        | Command::Daemon { .. }
         | Command::Status { .. }
         | Command::Pause(_)
         | Command::Resume(_)
@@ -118,13 +142,30 @@ fn main() -> anyhow::Result<()> {
     }
 }
 
+#[cfg(target_os = "macos")]
+fn run_menubar(endpoints: Endpoints) -> anyhow::Result<()> {
+    let (socket, model) = endpoints.resolve()?;
+    wisp::menubar::run(&socket, model)
+}
+
+#[cfg(not(target_os = "macos"))]
+fn run_menubar(_: Endpoints) -> anyhow::Result<()> {
+    anyhow::bail!("`wisp menubar` is only available on macOS; `wisp status` shows the same report")
+}
+
 async fn run(command: Command) -> anyhow::Result<()> {
     match command {
         Command::Init { shell: Shell::Zsh, socket } => print_zsh_plugin(&socket.resolve()?),
-        Command::Daemon(endpoints) => {
+        Command::Setup { model, port, menubar } => {
+            setup::setup(setup::Options { model, port, menubar }, &mut std::io::stdout()).await
+        }
+        Command::Uninstall => setup::uninstall(&mut std::io::stdout()).await,
+        Command::Doctor(endpoints) => run_doctor(endpoints).await,
+        Command::Daemon { endpoints, debounce_ms } => {
             let (socket, model) = endpoints.resolve()?;
             let paused_flag = paths::paused_flag(&socket);
-            daemon::run(Config { socket, model, debounce: DEBOUNCE, paused_flag }).await
+            let debounce = Duration::from_millis(debounce_ms);
+            daemon::run(Config { socket, model, debounce, paused_flag }).await
         }
         Command::Status { endpoints, json } => {
             let (socket, model) = endpoints.resolve()?;
@@ -145,6 +186,19 @@ async fn run(command: Command) -> anyhow::Result<()> {
     }
 }
 
+/// Prints the checklist, then fails if a check did, so scripts can rely on the exit status.
+async fn run_doctor(endpoints: Endpoints) -> anyhow::Result<()> {
+    let llm_url = endpoints.llm_url.clone();
+    let (socket, model) = endpoints.resolve()?;
+    let checks = doctor::Findings::gather(&socket, &model, &llm_url).await?.checks();
+    std::io::stdout().write_all(doctor::render(&checks).as_bytes()).context("writing checklist")?;
+    match doctor::failures(&checks) {
+        0 => Ok(()),
+        1 => anyhow::bail!("1 check failed"),
+        n => anyhow::bail!("{n} checks failed"),
+    }
+}
+
 fn set_paused(socket: &Path, paused: bool) -> anyhow::Result<()> {
     paths::set_paused(socket, paused)?;
     let state = if paused { "paused; `wisp resume` turns them back on" } else { "on" };
@@ -162,7 +216,7 @@ fn print_zsh_plugin(socket: &Path) -> anyhow::Result<()> {
 async fn complete_once(buffer: &str, show_prompt: bool, llm_url: &str) -> anyhow::Result<()> {
     let sources = Sources {
         cwd: std::env::current_dir().context("reading current directory")?,
-        pane: std::env::var("WEZTERM_PANE").unwrap_or_default(),
+        terminal: Terminal::from_env(),
         histfile: std::env::var_os("HISTFILE")
             .map(PathBuf::from)
             .or_else(|| std::env::home_dir().map(|home| home.join(".zsh_history"))),
@@ -176,6 +230,8 @@ async fn complete_once(buffer: &str, show_prompt: bool, llm_url: &str) -> anyhow
     if show_prompt {
         let healed = HealedPrompt::new(&transcript, buffer);
         writeln!(out, "{}\n--- grammar: {}", healed.prompt, healed.grammar)?;
+        let source = sources.terminal.source().map_or("none", |source| source.name());
+        writeln!(out, "--- screen source: {source}")?;
     }
     let model = LlamaClient::new(llm_url)?;
     for attempt in ["cold", "cached"] {

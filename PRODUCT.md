@@ -8,11 +8,11 @@ web
 
 ## Stack
 
-Static HTML/CSS in `site/`, no build step and no dependencies. It must be deployable as-is to GitHub Pages, Cloudflare Pages or Vercel. The deploy target is undecided.
+Static HTML/CSS/JS in `site/`, no build step and no dependencies. It is served by GitHub Pages at `https://lolabradora.github.io/wisp/`, a sub-path, so every asset and link URL in `site/` is relative. The page makes no external requests and runs under a strict CSP (`site/_headers`): no inline scripts or styles.
 
 ## Users
 
-Developers on macOS who spend their day in zsh. They type long, specific commands: branch names, pod names, file paths, PIDs that just scrolled past in the terminal. Their job is to retype those without copying and pasting, and without leaving the keyboard. They already know zsh-autosuggestions and are skeptical of AI tools that send their terminal to the cloud.
+Developers on macOS or Linux who spend their day in zsh. They type long, specific commands: branch names, pod names, file paths, PIDs that just scrolled past in the terminal. Their job is to retype those without copying and pasting, and without leaving the keyboard. Many already know zsh-autosuggestions. They arrive from Hacker News or GitHub and are skeptical of AI tools that send their terminal to the cloud.
 
 ## Product Purpose
 
@@ -20,15 +20,29 @@ wisp shows grey "ghost text" command suggestions in zsh, written by a small loca
 
 ## Positioning
 
-wisp reads the terminal output above the prompt and completes names that just appeared there: `docker-compose.prod.yml` from an `ls`, a crash-looping pod from `kubectl get pods`, a PID from `lsof`. It does this inline as ghost text, in the user's existing terminal, with a model running on their own Mac. Hosted tools send the terminal to the cloud (Kiro CLI, Warp) or require their own terminal app (Warp, Wave). History-only tools (zsh-autosuggestions, Atuin) cannot complete what they have never seen.
+wisp reads the terminal output above the prompt and completes names that just appeared there: `docker-compose.prod.yml` from an `ls`, a crash-looping pod from `kubectl get pods`, a PID from `lsof`. It does this inline as ghost text, in the user's existing terminal, with a model running on their own machine. Hosted tools send the terminal to the cloud (Kiro CLI, Warp) or require their own terminal app (Warp, Wave). History-only tools (zsh-autosuggestions, Atuin) cannot complete what they have never seen.
 
 ## Operating Context
 
-- **Hardware and model.** Apple Silicon Mac. llama.cpp's `llama-server` runs Qwen2.5-Coder 1.5B or 3B as a launchd agent. The model always stays on the Mac.
-- **Shell.** zsh with zsh-autosuggestions, which draws the grey text and provides the accept keys (→, End, Ctrl-F). Works alongside zsh-vi-mode, fzf-tab and starship.
-- **Screen context.** Comes from `wezterm cli get-text`, so it requires WezTerm. Other terminals still get history, files, git and session commands.
-- **Menu bar and CLI.** A macOS menu bar item and `wisp status` show the model, latency and recent suggestions. `wisp pause` / `wisp resume` switch suggestions off and on.
-- **Install.** `brew install llama.cpp`, `cargo install --path .`, the service scripts, then `eval "$(wisp init zsh)"` in `~/.zshrc`.
+- **Platforms.** macOS (Apple Silicon and Intel) and Linux (x86_64 and aarch64). zsh only.
+- **Model.** llama.cpp's `llama-server` runs Qwen2.5-Coder 1.5B (default) or 3B on `127.0.0.1:8012`, kept running by a launchd agent on macOS or a systemd user unit on Linux. The model always stays on the machine.
+- **Shell.** zsh. zsh-autosuggestions is optional: if it is loaded before wisp, wisp uses it to draw the grey text and the user keeps its keys. If not, wisp draws the ghost text itself; →, End and Ctrl-F (at the end of the line) accept, Alt-F accepts one word.
+- **Screen context.** Pluggable sources, first match wins:
+  1. `WISP_SCREEN_CMD`, a custom command whose stdout is the screen text.
+  2. tmux (`tmux capture-pane`), which works in any terminal emulator: Ghostty, iTerm2, Alacritty, Terminal.app and others.
+  3. WezTerm (`wezterm cli get-text`).
+  4. kitty (`kitty @ get-text`), which needs `allow_remote_control` and `listen_on` in `kitty.conf`. **Experimental**: not verified on a real kitty install. Say so wherever kitty is mentioned.
+  Without a source wisp still uses history, the files in the current directory, git branches and the session's finished commands with their exit codes.
+- **CLI.** `wisp setup`, `wisp doctor`, `wisp status`, `wisp pause` / `wisp resume`, `wisp uninstall`, `wisp complete`. A menu bar item (macOS only, `wisp setup --menubar`) shows the model, latency and recent suggestions.
+- **Install.**
+  ```
+  brew install llama.cpp          # or a llama.cpp release binary on Linux
+  curl -fsSL https://raw.githubusercontent.com/lolabradora/wisp/main/install.sh | sh
+  wisp setup                      # model download + background service
+  echo 'eval "$(wisp init zsh)"' >> ~/.zshrc
+  ```
+  `install.sh` puts a prebuilt binary in `~/.local/bin`. Alternative: `cargo install --git https://github.com/lolabradora/wisp`. `wisp doctor` is the "is it working?" check.
+- **Links.** Repo `https://github.com/lolabradora/wisp` (public, MIT, org HEYLOLA at `https://github.com/lolabradora`). Docs are the GitHub wiki at `https://github.com/lolabradora/wisp/wiki`: Installation, Terminal-support, How-it-works, Troubleshooting, FAQ.
 
 ## Capabilities and Constraints
 
@@ -36,15 +50,17 @@ wisp reads the terminal output above the prompt and completes names that just ap
 - Completes the current line while typing, after a 60 ms pause.
 - Token healing: the partial word being typed is forced through a GBNF grammar instead of ending the prompt mid-token.
 - Reuses the prompt cache between keystrokes. A suggestion the user keeps typing along with is reused without another model call.
-- macOS only. zsh only; fish has no autosuggestion hook.
-- Screen reading works only in WezTerm. Other terminals would need a PTY proxy, which is planned but not built.
-- Requires Rust (cargo) to install today; there is no Homebrew formula or binary release yet.
-- The GitHub repo is `micovi/wisp`. It is private for now, and the public release date is undecided.
+- zsh only. bash and fish are not supported.
+- Screen reading needs tmux, WezTerm, kitty (experimental) or a custom command. A bare terminal window outside those gets history, files, git and session commands only.
+- The menu bar item is macOS only.
+- The model stays loaded in RAM: budget roughly 2 to 4.5 GB depending on the model (see Evidence for what was measured).
+- Needs llama.cpp's `llama-server` on the `PATH`; wisp does not bundle it.
 
 ## Brand Commitments
 
 - The name is **wisp**, always lowercase.
-- There is no logo, palette or visual identity yet.
+- The visual identity is "Struck Cathode Gauze", recorded in DESIGN.md: ink plane, bronze gauze plate, cathode orange for the struck value. There is no drawn logo; the wordmark is the lowercase name.
+- Made by HEYLOLA. MIT licensed.
 
 ## Evidence on Hand
 
@@ -65,7 +81,9 @@ All figures are internal measurements on an Apple M5 with 24 GB. They must be la
   - `kill ` → `48213`
   - `docker exec -it pgl-d` → `pgl-db-1`
   - `cargo cl` → `cargo clippy --all-targets --all-features -- -D warnings` (3B, from history)
-- **Memory.** The 3B llama-server uses about 4.3 GB.
+- **Memory.** The 3B llama-server uses about 4.3 GB. The 1.5B server has not been measured.
+- **Download size.** 1.65 GB for the 1.5B model, 3.3 GB for 3B. These are the listed sizes of the GGUF files llama.cpp fetches, not our measurements.
+- **Coverage.** Every figure above comes from one machine. Nothing has been measured on Linux or on Intel Macs.
 - **License.** MIT (open source).
 - **Absent: do not fabricate.** No users, testimonials, stars, download counts, press, or company logos. No benchmark against other tools. No screenshots or recordings yet.
 

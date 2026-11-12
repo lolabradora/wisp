@@ -1,5 +1,8 @@
 //! Drives the daemon over its unix socket with a fake llama-server behind it.
-#![expect(
+// `allow`, not `expect`: clippy 1.100 stopped flagging these in integration tests, and an
+// unfulfilled `expect` is an error there while older toolchains still need the exemption.
+#![allow(
+    clippy::allow_attributes,
     clippy::unwrap_used,
     clippy::panic,
     reason = "test helpers outside #[test] fns should fail loudly"
@@ -7,8 +10,8 @@
 
 use std::os::unix::fs::PermissionsExt as _;
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use tokio::io::{AsyncBufReadExt as _, AsyncReadExt as _, AsyncWriteExt as _, BufReader, Lines};
@@ -26,6 +29,14 @@ const REPLY_TIMEOUT: Duration = Duration::from_secs(2);
 struct FakeModel {
     url: String,
     calls: Arc<AtomicUsize>,
+    /// The prompt of every request, oldest first.
+    prompts: Arc<Mutex<Vec<String>>>,
+}
+
+impl FakeModel {
+    fn last_prompt(&self) -> String {
+        self.prompts.lock().unwrap().last().cloned().unwrap_or_default()
+    }
 }
 
 async fn fake_model(content: &'static str, delay: Duration) -> FakeModel {
@@ -33,13 +44,17 @@ async fn fake_model(content: &'static str, delay: Duration) -> FakeModel {
     let url = format!("http://{}", listener.local_addr().unwrap());
     let calls = Arc::new(AtomicUsize::new(0));
     let counter = Arc::clone(&calls);
+    let prompts = Arc::new(Mutex::new(Vec::new()));
+    let seen = Arc::clone(&prompts);
     tokio::spawn(async move {
         loop {
             let (mut stream, _) = listener.accept().await.unwrap();
             let counter = Arc::clone(&counter);
+            let seen = Arc::clone(&seen);
             tokio::spawn(async move {
                 let request = read_http_request(&mut stream).await;
                 counter.fetch_add(1, Ordering::SeqCst);
+                seen.lock().unwrap().push(prompt_of(&request));
                 tokio::time::sleep(delay).await;
                 let output = format!("{}{content}", forced_prefix(&request));
                 let body = serde_json::json!({ "content": output }).to_string();
@@ -51,7 +66,12 @@ async fn fake_model(content: &'static str, delay: Duration) -> FakeModel {
             });
         }
     });
-    FakeModel { url, calls }
+    FakeModel { url, calls, prompts }
+}
+
+fn prompt_of(request_body: &str) -> String {
+    let request: serde_json::Value = serde_json::from_str(request_body).unwrap();
+    request["prompt"].as_str().unwrap().to_owned()
 }
 
 /// Extracts the literal from a `root ::= "<literal>" ...` grammar.
@@ -132,8 +152,72 @@ async fn connect(socket: &Path) -> UnixStream {
     panic!("daemon never listened on {}", socket.display());
 }
 
+/// A `done` message as the 0.2 plugin sends it, from a shell whose terminal has no screen
+/// source: every `term` field is present and empty.
 fn done(seq: u64, cmd: &str, cwd: &Path) -> serde_json::Value {
-    serde_json::json!({ "t": "done", "seq": seq, "cmd": cmd, "status": 0, "cwd": cwd })
+    done_in(seq, cmd, cwd, &serde_json::json!({}))
+}
+
+/// A `done` message from a shell with the `term` fields in `set`; the others are empty.
+fn done_in(seq: u64, cmd: &str, cwd: &Path, set: &serde_json::Value) -> serde_json::Value {
+    let mut term = serde_json::json!({
+        "tmux": "", "tmux_pane": "", "wezterm_pane": "",
+        "kitty_window": "", "kitty_listen": "", "screen_cmd": "",
+    });
+    for (field, value) in set.as_object().unwrap() {
+        term[field] = value.clone();
+    }
+    serde_json::json!({
+        "t": "done", "seq": seq, "cmd": cmd, "status": 0, "cwd": cwd, "histfile": "",
+        "pane": term["wezterm_pane"], "term": term,
+    })
+}
+
+/// An isolated tmux server with one pane; killed when dropped, also when the test fails.
+struct TmuxServer {
+    name: String,
+    /// `$TMUX` for a shell in the pane: `<socket path>,<server pid>,<session>`.
+    tmux_env: String,
+    /// `$TMUX_PANE` for a shell in the pane.
+    pane: String,
+}
+
+impl TmuxServer {
+    /// `None` when tmux is not installed, so the test can skip itself.
+    fn start(shell_command: &str) -> Option<Self> {
+        let mut server = Self {
+            name: format!("wisp-test-{}", std::process::id()),
+            tmux_env: String::new(),
+            pane: String::new(),
+        };
+        // -f /dev/null keeps the user's tmux.conf out of the test.
+        let started = server
+            .tmux(&["-f", "/dev/null", "new-session", "-d", "-x", "80", "-y", "24", shell_command])
+            .ok()?;
+        assert!(started.status.success(), "tmux: {}", String::from_utf8_lossy(&started.stderr));
+
+        let format = "#{socket_path},#{pid},#{session_id}\t#{pane_id}";
+        let output = server.tmux(&["display-message", "-p", format]).unwrap();
+        let line = String::from_utf8(output.stdout).unwrap();
+        let (tmux_env, pane) = line.trim().split_once('\t').unwrap();
+        tmux_env.clone_into(&mut server.tmux_env);
+        pane.clone_into(&mut server.pane);
+        Some(server)
+    }
+
+    fn tmux(&self, args: &[&str]) -> std::io::Result<std::process::Output> {
+        std::process::Command::new("tmux").args(["-L", &self.name]).args(args).output()
+    }
+}
+
+impl Drop for TmuxServer {
+    fn drop(&mut self) {
+        let _ = self.tmux(&["kill-server"]);
+        // A killed server can leave its socket file behind.
+        if let Some(socket) = self.tmux_env.split(',').next().filter(|path| !path.is_empty()) {
+            let _ = std::fs::remove_file(socket);
+        }
+    }
 }
 
 fn req(seq: u64, buf: &str) -> serde_json::Value {
@@ -146,6 +230,76 @@ async fn predicts_next_command_after_a_command_finishes() {
     let mut shell = start_daemon(&model.url).await;
     shell.send(done(1, "cargo build", &PathBuf::from("/tmp"))).await;
     assert_eq!(shell.reply().await.as_deref(), Some("1\tcargo test"));
+}
+
+#[tokio::test]
+async fn a_legacy_done_message_with_only_a_pane_still_works() {
+    let model = fake_model("cargo test", Duration::ZERO).await;
+    let mut shell = start_daemon(&model.url).await;
+    // What the 0.1 plugin sends: a WezTerm pane id (none here) and no `term` object.
+    let legacy = serde_json::json!({
+        "t": "done", "seq": 1, "cmd": "cargo build", "status": 0, "cwd": "/tmp",
+        "pane": "", "histfile": "",
+    });
+    shell.send(legacy).await;
+    assert_eq!(shell.reply().await.as_deref(), Some("1\tcargo test"));
+    assert!(model.last_prompt().contains("$ cargo build\n"), "{}", model.last_prompt());
+}
+
+#[tokio::test]
+async fn the_screen_command_of_the_shell_ends_up_in_the_prompt() {
+    let model = fake_model("cargo test", Duration::ZERO).await;
+    let mut shell = start_daemon(&model.url).await;
+    let term = serde_json::json!({ "screen_cmd": "echo wisp-custom-screen-marker" });
+    shell.send(done_in(1, "cargo build", Path::new("/tmp"), &term)).await;
+    assert_eq!(shell.reply().await.as_deref(), Some("1\tcargo test"));
+    let prompt = model.last_prompt();
+    assert!(
+        prompt.contains(
+            "# Terminal screen, newest output at the bottom:\nwisp-custom-screen-marker\n# cwd"
+        ),
+        "{prompt}"
+    );
+}
+
+#[tokio::test]
+async fn a_shell_without_a_screen_source_gets_a_prompt_without_a_screen() {
+    let model = fake_model("cargo test", Duration::ZERO).await;
+    let mut shell = start_daemon(&model.url).await;
+    shell.send(done(1, "cargo build", Path::new("/tmp"))).await;
+    assert_eq!(shell.reply().await.as_deref(), Some("1\tcargo test"));
+    assert!(!model.last_prompt().contains("# Terminal screen"), "{}", model.last_prompt());
+}
+
+/// Runs a real tmux server and checks that what its pane shows reaches the model.
+#[tokio::test]
+async fn the_tmux_pane_of_the_shell_ends_up_in_the_prompt() {
+    let Some(tmux) = TmuxServer::start("echo wisp-tmux-screen-marker; exec sleep 60") else {
+        // Nothing to test without tmux; the command line itself is covered by unit tests.
+        return;
+    };
+    let model = fake_model("cargo test", Duration::ZERO).await;
+    let mut shell = start_daemon(&model.url).await;
+    let term =
+        serde_json::json!({ "tmux": tmux.tmux_env, "tmux_pane": tmux.pane, "wezterm_pane": "999" });
+
+    // The pane's command prints a moment after the server starts, so ask until it shows.
+    let mut prompt = String::new();
+    for seq in 1..=50 {
+        shell.send(done_in(seq, "", Path::new("/tmp"), &term)).await;
+        assert!(shell.reply().await.is_some());
+        prompt = model.last_prompt();
+        if prompt.contains("wisp-tmux-screen-marker") {
+            break;
+        }
+        tokio::time::sleep(Duration::from_millis(100)).await;
+    }
+    assert!(
+        prompt.contains(
+            "# Terminal screen, newest output at the bottom:\nwisp-tmux-screen-marker\n# cwd"
+        ),
+        "{prompt}"
+    );
 }
 
 #[tokio::test]

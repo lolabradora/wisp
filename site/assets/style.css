@@ -32,6 +32,7 @@
   --ash: #8a8578;
   --cathode: #ff6a1a;
   --bronze: #8a6a3a;
+  --glint: 0 0 0.6em rgb(255 106 26 / 0.45);
   --halo: 0 0 0.12em rgb(255 106 26 / 0.9), 0 0 0.5em rgb(255 106 26 / 0.75), 0 0 1.2em rgb(255 106 26 / 0.45), 0 0 2.4em rgb(255 106 26 / 0.22);
   --display: "Barlow Condensed", "Arial Narrow", sans-serif;
   --mono: "M PLUS 1 Code", ui-monospace, "SF Mono", Menlo, monospace;
@@ -95,6 +96,10 @@ code {
   color: var(--bone);
   font-size: 0.92em;
 }
+p > code,
+li > code {
+  white-space: nowrap;
+}
 
 kbd {
   font-size: 0.85em;
@@ -104,6 +109,10 @@ kbd {
   color: var(--bone);
 }
 
+.keys {
+  white-space: nowrap;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -111,6 +120,10 @@ kbd {
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
+}
+
+html:not(.js) [data-js] {
+  display: none;
 }
 
 .skip {
@@ -148,6 +161,11 @@ kbd {
   text-decoration: none;
 }
 
+.nav {
+  display: flex;
+  gap: max(calc(34 * var(--u)), 1.25rem);
+}
+
 .nav-link {
   font-family: var(--sans);
   font-weight: 500;
@@ -156,15 +174,15 @@ kbd {
   color: var(--bone);
   text-decoration: none;
 }
-.nav-link:hover {
+.nav-link:hover,
+.wordmark:hover {
   color: var(--cathode);
 }
 
 /* Hero: one command line, candidates as ghosts, one struck forward. */
 .hero {
   position: relative;
-  height: max(100svh, calc(1024 * var(--u)));
-  min-height: calc(1024 * var(--u));
+  height: max(100svh, calc(880 * var(--u)));
   overflow: hidden;
   isolation: isolate;
 }
@@ -201,6 +219,52 @@ kbd {
 }
 .line .command {
   margin-top: calc(15 * var(--u));
+}
+
+/* What the terminal printed just before: the name is on screen before wisp strikes it. */
+.seen {
+  position: absolute;
+  left: 0;
+  bottom: 100%;
+  margin: 0 0 calc(30 * var(--u));
+  font-size: max(calc(19 * var(--u)), 0.8rem);
+  line-height: 1.5;
+  color: var(--ash);
+  white-space: pre;
+}
+.seen mark {
+  background: none;
+  color: inherit;
+}
+.seen mark.lit {
+  color: var(--cathode);
+  text-shadow: var(--glint);
+}
+
+.stack.unstruck .ghosts,
+.stack.unstruck .struck {
+  visibility: hidden;
+}
+
+.demo-toggle {
+  position: absolute;
+  right: calc(60 * var(--u));
+  bottom: calc(48 * var(--u));
+  z-index: 2;
+}
+.demo-toggle,
+.scenario-picker button {
+  padding: 0.25rem 0;
+  border: 0;
+  background: none;
+  font-family: var(--mono);
+  font-size: 1rem;
+  color: var(--ash);
+  cursor: pointer;
+}
+.demo-toggle:hover,
+.scenario-picker button:hover {
+  color: var(--bone-dim);
 }
 .caret {
   display: inline-block;
@@ -282,8 +346,8 @@ kbd {
 .pitch {
   position: absolute;
   left: 4.5%;
-  top: 67.5%;
-  width: 60%;
+  right: 4.5%;
+  bottom: calc(54 * var(--u));
 }
 
 h1 {
@@ -307,13 +371,14 @@ h1 span {
   line-height: 1.35;
   letter-spacing: -0.03em;
   color: var(--bone);
+  max-width: none;
+  text-wrap: balance;
 }
 
 .pill {
   display: inline-flex;
   align-items: center;
   gap: 0.6em;
-  margin-top: calc(32 * var(--u));
   padding: 0.74em 1.3em;
   line-height: 1.2;
   border: 2px solid var(--cathode);
@@ -330,8 +395,71 @@ h1 span {
   color: var(--ink);
 }
 .pill-mark {
+  flex: none;
   width: 1.15em;
   height: 1.15em;
+}
+/* Quiet pill: the bronze hairline of the copy pill, for the secondary action. */
+.pill-quiet {
+  padding: calc(0.5em + 1px) 1.1em;
+  border: 1px solid var(--bronze);
+  font-size: max(calc(16 * var(--u)), 0.9rem);
+  color: var(--bone);
+  transition: color 160ms ease-out, border-color 160ms ease-out;
+}
+.pill-quiet:hover {
+  background: none;
+  border-color: var(--cathode);
+  color: var(--cathode);
+}
+
+.text-link {
+  color: var(--bone);
+  text-decoration-color: var(--bronze);
+  transition: color 160ms ease-out, text-decoration-color 160ms ease-out;
+}
+.text-link:hover {
+  color: var(--cathode);
+  text-decoration-color: currentColor;
+}
+
+/* The primary action is the install command itself, with its controls on the row below. */
+.cmd.hero-cmd {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(22 * var(--u));
+  margin-top: calc(36 * var(--u));
+}
+.cmd.hero-cmd code {
+  font-size: max(calc(19 * var(--u)), 0.9rem);
+  font-weight: 500;
+}
+.cmd .copy-primary {
+  padding: 0.5em 1.2em;
+  border: 2px solid var(--cathode);
+  font-size: max(calc(16 * var(--u)), 0.9rem);
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--cathode);
+  transition: background-color 160ms ease-out, color 160ms ease-out;
+}
+.cmd .copy-primary:hover,
+.cmd .copy-primary.copied {
+  background: var(--cathode);
+  color: var(--ink);
+}
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  max-width: none;
+  margin: 0;
+  font-weight: 500;
+  font-size: max(calc(17 * var(--u)), 0.95rem);
+}
+.hero-actions .text-link {
+  margin-left: 0.75rem;
 }
 
 /* Sections below the fold share the plane; grouping is space, not boxes. */
@@ -351,9 +479,30 @@ h2 {
   text-wrap: balance;
 }
 
+h3 {
+  margin: 0 0 0.75rem;
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: clamp(1.75rem, 2.6vw, 2.25rem);
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+}
+
 p {
   max-width: 66ch;
   color: var(--bone-dim);
+}
+p,
+li {
+  text-wrap: pretty;
+}
+
+.lead {
+  margin: 0;
+  font-size: 1.125rem;
+}
+.aside {
+  margin: 3.5rem 0 0;
 }
 
 .source {
@@ -372,18 +521,6 @@ p {
   flex-wrap: wrap;
   gap: 0.25rem 1.5rem;
   margin-bottom: 2rem;
-}
-.scenario-picker button {
-  padding: 0.25rem 0;
-  border: 0;
-  background: none;
-  font-family: var(--mono);
-  font-size: 1rem;
-  color: var(--ash);
-  cursor: pointer;
-}
-.scenario-picker button:hover {
-  color: var(--bone-dim);
 }
 .scenario-picker button[aria-selected="true"] {
   color: var(--cathode);
@@ -404,7 +541,7 @@ p {
 .output mark {
   background: none;
   color: var(--cathode);
-  text-shadow: 0 0 0.6em rgb(255 106 26 / 0.45);
+  text-shadow: var(--glint);
 }
 
 .prompt-line {
@@ -451,6 +588,16 @@ p {
   gap: clamp(2rem, 6vw, 6rem);
   margin: 3rem 0 0;
 }
+@media (min-width: 1101px) {
+  .figures .readouts {
+    /* Columns follow the width of their numerals: 7/8, 50–120 ms, 4.3 GB. */
+    grid-template-columns: minmax(0, 3fr) minmax(0, 5fr) minmax(0, 4fr);
+    gap: clamp(2rem, 4vw, 4rem);
+  }
+  .tube-digits {
+    font-size: clamp(5rem, 7.2vw, 8.25rem);
+  }
+}
 .readout dt {
   font-family: var(--mono);
   font-size: 0.95rem;
@@ -493,15 +640,129 @@ p {
   color: var(--bone-dim);
 }
 
+/* Every figure, by model: a bare table on the plane. */
+.ledger {
+  width: 100%;
+  max-width: 48rem;
+  margin-top: 4.5rem;
+  border-collapse: collapse;
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  text-align: left;
+}
+.ledger th,
+.ledger td {
+  padding: 0.4rem 0;
+  vertical-align: baseline;
+}
+.ledger th {
+  font-weight: 400;
+  color: var(--bone-dim);
+}
+.ledger td {
+  color: var(--bone);
+}
+.ledger tr > * + * {
+  width: 24%;
+  padding-left: 1.5rem;
+}
+.ledger thead th {
+  padding-bottom: 0.9rem;
+  color: var(--bone);
+  font-weight: 500;
+}
+.th-note {
+  font-weight: 400;
+  color: var(--ash);
+}
+.figures .footnote {
+  max-width: 76ch;
+}
+
+.terminals .sources {
+  display: grid;
+  gap: 2.75rem;
+  margin: 3.5rem 0 0;
+}
+.source-row {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  column-gap: clamp(2rem, 6vw, 6rem);
+  align-items: baseline;
+}
+.source-row dt {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: clamp(1.75rem, 2.6vw, 2.25rem);
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+}
+.flag {
+  margin-left: 0.4em;
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 0.95rem;
+  letter-spacing: 0;
+  color: var(--bone-dim);
+}
+.source-row dd {
+  margin: 0;
+}
+.source-row dd p {
+  margin: 0 0 0.6rem;
+}
+.source-row dd > code {
+  display: block;
+  font-size: clamp(0.85rem, 1.2vw, 0.95rem);
+  color: var(--bone);
+  overflow-wrap: anywhere;
+}
+.source-row dd > code::before {
+  content: "$ ";
+  color: var(--ghost-edge);
+}
+
+.how {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: clamp(2rem, 6vw, 6rem);
+  align-items: start;
+}
+.how-copy p:first-of-type {
+  margin-top: 0;
+  font-size: 1.125rem;
+}
+
 .local-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(1.5rem, 5vw, 5rem);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1.5rem, 4vw, 4rem);
+}
+.local-grid p {
+  margin: 0;
+}
+
+.limit-list {
+  list-style: none;
+  margin: 2.5rem 0 0;
+  padding: 0;
+  columns: 2;
+  column-gap: clamp(2rem, 6vw, 6rem);
+}
+.limit-list li {
+  max-width: 52ch;
+  margin: 0 0 1.75rem;
+  break-inside: avoid;
+  color: var(--bone-dim);
+}
+.limit-list strong {
+  font-weight: 500;
+  color: var(--bone);
 }
 
 .behaviours {
   list-style: none;
-  margin: 3.5rem 0 0;
+  margin: 0.35rem 0 0;
   padding: 0;
   display: grid;
   gap: 1.1rem;
@@ -523,6 +784,7 @@ p {
 .steps {
   list-style: none;
   counter-reset: step;
+  max-width: 62rem;
   margin: 3rem 0;
   padding: 0;
   display: grid;
@@ -536,7 +798,6 @@ p {
 }
 .steps li::before {
   content: counter(step);
-  grid-row: span 2;
   font-family: var(--display);
   font-size: 3.25rem;
   line-height: 0.9;
@@ -544,6 +805,9 @@ p {
 }
 .steps p {
   margin: 0 0 0.75rem;
+}
+.steps .cmd + p {
+  margin-top: 1.25rem;
 }
 
 .cmd {
@@ -553,7 +817,7 @@ p {
   min-width: 0;
 }
 .cmd code {
-  flex: 1;
+  flex: 0 1 auto;
   min-width: 0;
   font-size: clamp(0.9rem, 1.4vw, 1.15rem);
   color: var(--bone);
@@ -584,6 +848,21 @@ p {
   border-color: var(--cathode);
 }
 
+.check {
+  max-width: 62rem;
+  padding-left: 4.5rem;
+}
+.check p {
+  margin: 0 0 0.75rem;
+}
+.install-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 2rem;
+  max-width: none;
+  margin: 4rem 0 0;
+}
 .install .pill {
   font-size: 1rem;
 }
@@ -607,11 +886,52 @@ p {
 .colophon a:hover {
   color: var(--cathode);
 }
+.colophon-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.5rem;
+  flex-basis: 100%;
+}
+
+/* 404: one screen, the same plane. */
+.lost {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100svh;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 3rem max(var(--gutter), 1.25rem);
+}
+.lost-screen {
+  margin: 0 0 2.5rem;
+  font-size: clamp(0.8rem, 1.3vw, 1.1rem);
+  line-height: 1.5;
+  color: var(--ash);
+  white-space: pre-wrap;
+}
+.lost h1 {
+  font-size: clamp(2.5rem, 5.2vw, 5rem);
+  line-height: 1;
+}
+.lost p {
+  margin: 1.5rem 0 0;
+  font-size: 1.125rem;
+}
+.lost .pill {
+  margin-top: 1rem;
+  font-size: 1rem;
+}
 
 /* Phones and narrow tablets: the tube stacks under the command, the pitch follows in flow. */
 @media (max-width: 1100px) {
-  .figures .readouts {
+  .figures .readouts,
+  .local-grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+  .local-grid {
+    gap: 1.25rem;
   }
 }
 
@@ -635,8 +955,8 @@ p {
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    gap: 3rem;
-    padding: 7.5rem var(--gutter) 3rem;
+    gap: 2.25rem;
+    padding: 5.5rem var(--gutter) 2.5rem;
   }
   .tube,
   .line,
@@ -646,6 +966,20 @@ p {
   }
   .line {
     flex-direction: column;
+  }
+  /* Every demo frame keeps the same height, so typing never moves the page. */
+  .seen {
+    position: static;
+    margin: 0 0 1.5rem;
+    font-size: clamp(0.75rem, 3.3vw, 0.85rem);
+  }
+  .line .command {
+    min-height: 2.2em;
+  }
+  .demo-toggle {
+    position: static;
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
   }
   .line .command {
     margin-top: 0;
@@ -666,7 +1000,8 @@ p {
     font-size: 1.4rem;
   }
   h1 {
-    font-size: 3.4rem;
+    font-size: 3.1rem;
+    line-height: 1.06;
   }
   h1 span {
     display: inline;
@@ -675,14 +1010,45 @@ p {
     margin-top: 1rem;
     font-size: 0.95rem;
   }
-  .pill {
+  .pitch {
+    width: auto;
+  }
+  .cmd.hero-cmd {
     margin-top: 1.5rem;
-    font-size: 1rem;
+    gap: 1rem;
+  }
+  .cmd.hero-cmd code {
+    font-size: 0.8rem;
+  }
+  .cmd .copy-primary,
+  .pill-quiet {
+    font-size: 0.9rem;
+  }
+  .hero-actions .text-link {
+    margin-left: 0;
   }
   .source,
-  .figures .readouts,
-  .local-grid {
+  .how,
+  .source-row {
     grid-template-columns: minmax(0, 1fr);
+  }
+  .limit-list {
+    columns: 1;
+  }
+  .source-row dt {
+    margin-bottom: 0.5rem;
+  }
+  .behaviours {
+    margin-top: 1rem;
+  }
+  .ledger {
+    font-size: 0.85rem;
+  }
+  .ledger tr > * + * {
+    padding-left: 0.75rem;
+  }
+  .check {
+    padding-left: 3.5rem;
   }
   .steps li {
     grid-template-columns: 2.5rem minmax(0, 1fr);

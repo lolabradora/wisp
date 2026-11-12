@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-24T17:10:00Z",
+  "generatedAt": "2026-11-12T22:10:00Z",
   "title": "Design System: wisp",
   "extensions": {
     "colorMeta": {
@@ -145,6 +145,10 @@
       "label": {
         "displayName": "Label",
         "purpose": "Readout terms and scenario tabs in M PLUS 1 Code."
+      },
+      "subhead": {
+        "displayName": "Subhead",
+        "purpose": "Screen-source names and the install check heading, Barlow Condensed 500 at clamp(1.75rem, 2.6vw, 2.25rem)."
       }
     },
     "shadows": [
@@ -172,13 +176,23 @@
       },
       {
         "name": "strike-beat",
-        "value": "3400ms",
-        "purpose": "Interval between hero strikes; the new value snaps in with no tween."
+        "value": "3000ms",
+        "purpose": "Hold on each struck completion before the next example plays; the new value snaps in with no tween."
       },
       {
         "name": "first-strike-hold",
-        "value": "5200ms",
-        "purpose": "Hold on the first composed frame before cycling starts."
+        "value": "4200ms",
+        "purpose": "Hold on the first composed frame before the demo starts."
+      },
+      {
+        "name": "demo-keystroke",
+        "value": "55ms",
+        "purpose": "Interval between typed characters in the hero demo."
+      },
+      {
+        "name": "demo-strike-delay",
+        "value": "420ms",
+        "purpose": "Pause after the last typed character before the completion strikes and the source name lights."
       }
     ],
     "breakpoints": [
@@ -198,7 +212,7 @@
       "kind": "button",
       "refersTo": "button-pill",
       "description": "The one primary action shape: cathode outline that fills on hover.",
-      "html": "<a class=\"ds-pill\" href=\"#\">Install from GitHub <svg class=\"ds-pill-mark\" viewBox=\"0 0 16 16\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z\"/></svg></a>",
+      "html": "<a class=\"ds-pill\" href=\"#\">Read the source on GitHub <svg class=\"ds-pill-mark\" viewBox=\"0 0 16 16\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z\"/></svg></a>",
       "css": ".ds-pill { display: inline-flex; align-items: center; gap: 0.6em; padding: 0.74em 1.3em; line-height: 1.2; border: 2px solid var(--cathode, #ff6a1a); border-radius: 999px; font-family: \"M PLUS 1 Code\", ui-monospace, \"SF Mono\", Menlo, monospace; font-weight: 500; font-size: 1rem; color: var(--cathode, #ff6a1a); background: transparent; text-decoration: none; transition: background-color 160ms ease-out, color 160ms ease-out; } .ds-pill:hover { background: var(--cathode, #ff6a1a); color: var(--ink, #0a0a18); } .ds-pill:focus-visible { outline: 2px solid var(--cathode, #ff6a1a); outline-offset: 4px; border-radius: 2px; } .ds-pill-mark { width: 1.15em; height: 1.15em; }"
     },
     {
@@ -221,9 +235,9 @@
       "name": "Masthead",
       "kind": "nav",
       "refersTo": "nav-link",
-      "description": "No bar: lowercase wordmark left, one link right, on the plane.",
-      "html": "<header class=\"ds-mast\"><a class=\"ds-mark\" href=\"#\">wisp</a><a class=\"ds-nav\" href=\"#\">GitHub</a></header>",
-      "css": ".ds-mast { display: flex; justify-content: space-between; align-items: flex-start; padding: 1.25rem; background: var(--ink, #0a0a18); } .ds-mark, .ds-nav { font-family: \"M PLUS 1\", system-ui, sans-serif; font-weight: 500; line-height: 1; color: var(--bone, #f3ecdc); text-decoration: none; } .ds-mark { font-size: 1.6rem; } .ds-nav { font-size: 1rem; } .ds-nav:hover, .ds-mark:hover { color: var(--cathode, #ff6a1a); } .ds-mast a:focus-visible { outline: 2px solid var(--cathode, #ff6a1a); outline-offset: 4px; border-radius: 2px; }"
+      "description": "No bar: lowercase wordmark left, Install, Docs and GitHub right, on the plane.",
+      "html": "<header class=\"ds-mast\"><a class=\"ds-mark\" href=\"#\">wisp</a><nav class=\"ds-navs\"><a class=\"ds-nav\" href=\"#\">Install</a><a class=\"ds-nav\" href=\"#\">Docs</a><a class=\"ds-nav\" href=\"#\">GitHub</a></nav></header>",
+      "css": ".ds-mast { display: flex; justify-content: space-between; align-items: flex-start; padding: 1.25rem; background: var(--ink, #0a0a18); } .ds-mark, .ds-nav { font-family: \"M PLUS 1\", system-ui, sans-serif; font-weight: 500; line-height: 1; color: var(--bone, #f3ecdc); text-decoration: none; } .ds-mark { font-size: 1.6rem; } .ds-nav { font-size: 1rem; } .ds-nav:hover, .ds-mark:hover { color: var(--cathode, #ff6a1a); } .ds-mast a:focus-visible { outline: 2px solid var(--cathode, #ff6a1a); outline-offset: 4px; border-radius: 2px; } .ds-navs { display: flex; gap: 1.5rem; }"
     },
     {
       "name": "Keycap",
@@ -243,7 +257,7 @@
     {
       "name": "Candidate Stack",
       "kind": "custom",
-      "description": "Signature: command, hollow ghost candidates, and the one struck completion with the tube halo.",
+      "description": "Signature: terminal output above, the command, hollow ghost candidates, and the one struck completion with the tube halo; the same name lights in the output.",
       "html": "<div class=\"ds-line\"><p class=\"ds-command\">$ kubectl logs -n billing api<span class=\"ds-caret\"></span></p><div class=\"ds-stack\"><ul class=\"ds-ghosts\"><li>-worker-5c8d</li><li>-gateway</li><li>-api-v2</li></ul><p class=\"ds-struck\">-7d9f8b6c4-x2kqp</p></div></div>",
       "css": ".ds-line { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 0.6rem 1rem; padding: 2rem; background: var(--ink, #0a0a18); } .ds-command { margin: 0.4rem 0 0; font-family: \"M PLUS 1 Code\", ui-monospace, \"SF Mono\", Menlo, monospace; font-weight: 500; font-size: 1.5rem; line-height: 1.1; letter-spacing: -0.04em; color: var(--bone, #f3ecdc); white-space: nowrap; } .ds-caret { display: inline-block; width: 2px; height: 0.74em; margin-left: 0.12em; background: var(--bone, #f3ecdc); } .ds-stack { font-family: \"M PLUS 1 Code\", ui-monospace, \"SF Mono\", Menlo, monospace; white-space: nowrap; } .ds-ghosts { list-style: none; margin: 0; padding: 0; font-size: 1.15rem; font-weight: 300; line-height: 1.16; color: #10162a; -webkit-text-stroke: 1px #3a4a64; } .ds-struck { margin: 0.2rem 0 0; font-size: 1.2rem; font-weight: 500; line-height: 1.1; letter-spacing: 0.015em; color: var(--cathode, #ff6a1a); text-shadow: var(--halo, 0 0 0.12em rgb(255 106 26 / 0.9), 0 0 0.5em rgb(255 106 26 / 0.75), 0 0 1.2em rgb(255 106 26 / 0.45), 0 0 2.4em rgb(255 106 26 / 0.22)); }"
     },
@@ -251,8 +265,37 @@
       "name": "Tube Readout",
       "kind": "custom",
       "description": "Signature: a lit cathode numeral with its unlit predecessor in register.",
-      "html": "<div class=\"ds-readout\"><div class=\"ds-dt\">Names found only on screen, out of eight</div><span class=\"ds-digits\"><span class=\"ds-ghost\" aria-hidden=\"true\">3</span><span class=\"ds-lit\">7</span><span class=\"ds-unit\">/8</span></span><span class=\"ds-note\">3B with token healing. Without it: 3/8.</span></div>",
+      "html": "<div class=\"ds-readout\"><div class=\"ds-dt\">Eval: names found on screen</div><span class=\"ds-digits\"><span class=\"ds-ghost\" aria-hidden=\"true\">3</span><span class=\"ds-lit\">7</span><span class=\"ds-unit\">/8</span></span><span class=\"ds-note\">3B with token healing. Without it: 3/8.</span></div>",
       "css": ".ds-readout { padding: 2rem; background: var(--ink, #0a0a18); } .ds-dt { font-family: \"M PLUS 1 Code\", ui-monospace, \"SF Mono\", Menlo, monospace; font-size: 0.95rem; color: var(--bone-dim, #b9b3a6); } .ds-digits { position: relative; display: inline-flex; align-items: baseline; margin-top: 0.5rem; font-family: \"Barlow Condensed\", \"Arial Narrow\", sans-serif; font-weight: 400; font-size: 6rem; line-height: 1; } .ds-ghost { position: absolute; left: 0; top: 0; color: transparent; -webkit-text-stroke: 1.5px var(--ghost-edge, #4d4650); } .ds-lit { position: relative; color: var(--cathode, #ff6a1a); text-shadow: var(--halo, 0 0 0.12em rgb(255 106 26 / 0.9), 0 0 0.5em rgb(255 106 26 / 0.75), 0 0 1.2em rgb(255 106 26 / 0.45), 0 0 2.4em rgb(255 106 26 / 0.22)); } .ds-unit { margin-left: 0.08em; font-size: 0.42em; color: var(--bone-dim, #b9b3a6); } .ds-note { display: block; max-width: 44ch; margin-top: 0.75rem; font-family: \"M PLUS 1\", system-ui, sans-serif; color: var(--bone-dim, #b9b3a6); }"
+    },
+    {
+      "name": "Quiet Pill",
+      "kind": "button",
+      "refersTo": "button-pill-quiet",
+      "description": "Secondary action beside the primary pill: bronze hairline, bone text, no fill on hover.",
+      "html": "<a class=\"ds-quiet\" href=\"#\">GitHub</a>",
+      "css": ".ds-quiet { display: inline-flex; align-items: center; gap: 0.6em; padding: calc(0.5em + 1px) 1.1em; line-height: 1.2; border: 1px solid var(--bronze, #8a6a3a); border-radius: 999px; font-family: \"M PLUS 1 Code\", ui-monospace, \"SF Mono\", Menlo, monospace; font-weight: 500; font-size: 0.9rem; color: var(--bone, #f3ecdc); text-decoration: none; transition: color 160ms ease-out, border-color 160ms ease-out; } .ds-quiet:hover { color: var(--cathode, #ff6a1a); border-color: var(--cathode, #ff6a1a); } .ds-quiet:focus-visible { outline: 2px solid var(--cathode, #ff6a1a); outline-offset: 4px; border-radius: 2px; }"
+    },
+    {
+      "name": "Text Link",
+      "kind": "custom",
+      "description": "Docs and prose links: bone text, bronze hairline underline, cathode on hover.",
+      "html": "<a class=\"ds-link\" href=\"#\">Terminal support in the docs</a>",
+      "css": ".ds-link { font-family: \"M PLUS 1\", system-ui, sans-serif; color: var(--bone, #f3ecdc); text-decoration-line: underline; text-decoration-thickness: 1px; text-underline-offset: 0.25em; text-decoration-color: var(--bronze, #8a6a3a); transition: color 160ms ease-out, text-decoration-color 160ms ease-out; } .ds-link:hover { color: var(--cathode, #ff6a1a); text-decoration-color: currentColor; } .ds-link:focus-visible { outline: 2px solid var(--cathode, #ff6a1a); outline-offset: 4px; border-radius: 2px; }"
+    },
+    {
+      "name": "Source Index Row",
+      "kind": "custom",
+      "description": "One screen source: the name as a condensed subhead, a sentence, and the real command wisp runs.",
+      "html": "<div class=\"ds-src\"><div class=\"ds-src-name\">kitty <span>experimental</span></div><div><p>Needs allow_remote_control and listen_on in kitty.conf.</p><code>kitty @ get-text --extent screen</code></div></div>",
+      "css": ".ds-src { display: grid; grid-template-columns: 5fr 7fr; column-gap: 3rem; align-items: baseline; padding: 2rem; background: var(--ink, #0a0a18); } .ds-src-name { font-family: \"Barlow Condensed\", \"Arial Narrow\", sans-serif; font-weight: 500; font-size: 2rem; line-height: 1.05; color: var(--bone, #f3ecdc); } .ds-src-name span { margin-left: 0.4em; font-family: \"M PLUS 1\", system-ui, sans-serif; font-weight: 400; font-size: 0.95rem; color: var(--bone-dim, #b9b3a6); } .ds-src p { margin: 0 0 0.6rem; font-family: \"M PLUS 1\", system-ui, sans-serif; color: var(--bone-dim, #b9b3a6); } .ds-src code { font-family: \"M PLUS 1 Code\", ui-monospace, \"SF Mono\", Menlo, monospace; font-size: 0.95rem; color: var(--bone, #f3ecdc); } .ds-src code::before { content: \"$ \"; color: var(--ghost-edge, #4d4650); }"
+    },
+    {
+      "name": "Ledger",
+      "kind": "custom",
+      "description": "Every measured figure by model as a bare mono table; nothing in it is lit.",
+      "html": "<table class=\"ds-ledger\"><thead><tr><td></td><th>1.5B</th><th>3B</th></tr></thead><tbody><tr><th>Eval with token healing</th><td>6/8</td><td>7/8</td></tr><tr><th>Latency while typing</th><td>50–120 ms</td><td>150–450 ms</td></tr></tbody></table>",
+      "css": ".ds-ledger { border-collapse: collapse; font-family: \"M PLUS 1 Code\", ui-monospace, \"SF Mono\", Menlo, monospace; font-size: 0.95rem; text-align: left; background: var(--ink, #0a0a18); } .ds-ledger th, .ds-ledger td { padding: 0.4rem 1.5rem 0.4rem 0; } .ds-ledger th { font-weight: 400; color: var(--bone-dim, #b9b3a6); } .ds-ledger td { color: var(--bone, #f3ecdc); } .ds-ledger thead th { font-weight: 500; color: var(--bone, #f3ecdc); }"
     }
   ],
   "narrative": {
