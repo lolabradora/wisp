@@ -1,8 +1,13 @@
 [package]
 name = "wisp"
-version = "0.1.0"
-description = "AI ghost-text command suggestions for zsh"
+version = "0.2.0"
+description = "Ghost-text command suggestions for zsh from a local model that reads your terminal"
 license = "MIT"
+repository = "https://github.com/lolabradora/wisp"
+homepage = "https://github.com/lolabradora/wisp"
+readme = "README.md"
+keywords = ["zsh", "shell", "autosuggestions", "llama-cpp", "terminal"]
+categories = ["command-line-utilities", "development-tools"]
 edition = "2024"
 
 [dependencies]

@@ -1,13 +1,14 @@
-use std::fmt::Write as _;
+use std::ffi::OsStr;
+use std::fmt::{Debug, Write as _};
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
 use tokio::process::Command;
 
 use crate::history;
+use crate::screen::{SCREEN_LINES, Terminal};
 
 const HISTORY_LIMIT: usize = 30;
-const SCREEN_LINES: usize = 60;
 const SCREEN_LINE_CHARS: usize = 200;
 const FILE_LIMIT: usize = 40;
 const BRANCH_LIMIT: usize = 10;
@@ -24,8 +25,8 @@ pub struct FinishedCommand {
 #[derive(Debug, Clone, Default)]
 pub struct Sources {
     pub cwd: PathBuf,
-    /// `WezTerm` pane id; empty when the shell is not running inside `WezTerm`.
-    pub pane: String,
+    /// What the shell knows about its terminal; decides how the screen is read.
+    pub terminal: Terminal,
     pub histfile: Option<PathBuf>,
 }
 
@@ -62,7 +63,7 @@ impl Context {
             run_probe("git", &recent_branch_args),
             list_files(&sources.cwd),
             read_history(sources.histfile.as_deref()),
-            capture_screen(&sources.pane),
+            sources.terminal.capture(),
         );
 
         let last_failure = session.last().filter(|cmd| cmd.status != 0).cloned();
@@ -82,7 +83,7 @@ impl Context {
     /// the model server can reuse its prompt cache.
     #[must_use]
     pub fn transcript(&self) -> String {
-        let mut out = String::from("# zsh on macOS. Recent commands, oldest first:\n");
+        let mut out = format!("# zsh on {}. Recent commands, oldest first:\n", os_name());
         for command in &self.history {
             let _ = writeln!(out, "$ {command}");
         }
@@ -105,6 +106,17 @@ impl Context {
             let _ = writeln!(out, "# `{}` failed with exit code {}", failed.command, failed.status);
         }
         out
+    }
+}
+
+/// The OS as the model knows it from shell transcripts, so its suggestions fit the platform
+/// (`brew` and `open` on macOS, `apt` and `xdg-open` on Linux).
+#[must_use]
+pub fn os_name() -> &'static str {
+    match std::env::consts::OS {
+        "macos" => "macOS",
+        "linux" => "Linux",
+        other => other,
     }
 }
 
@@ -138,14 +150,6 @@ async fn read_history(histfile: Option<&Path>) -> Vec<String> {
     })
 }
 
-async fn capture_screen(pane: &str) -> String {
-    if pane.is_empty() {
-        return String::new();
-    }
-    let start_line = format!("-{SCREEN_LINES}");
-    run_probe("wezterm", &["cli", "get-text", "--pane-id", pane, "--start-line", &start_line]).await
-}
-
 async fn list_files(cwd: &Path) -> Vec<String> {
     let mut entries = match tokio::fs::read_dir(cwd).await {
         Ok(entries) => entries,
@@ -169,7 +173,7 @@ async fn list_files(cwd: &Path) -> Vec<String> {
 }
 
 /// Runs a short-lived command and returns its stdout, or an empty string if it fails.
-async fn run_probe(program: &str, args: &[&str]) -> String {
+pub(crate) async fn run_probe(program: &str, args: &[impl AsRef<OsStr> + Debug]) -> String {
     let output = Command::new(program).args(args).kill_on_drop(true).output();
     match tokio::time::timeout(PROBE_TIMEOUT, output).await {
         Ok(Ok(output)) if output.status.success() => {
@@ -226,9 +230,22 @@ mod tests {
     #[test]
     fn transcript_skips_empty_sections() {
         let context = Context { cwd: "/tmp".into(), ..Context::default() };
+        let os = if cfg!(target_os = "macos") { "macOS" } else { "Linux" };
         assert_eq!(
             context.transcript(),
-            "# zsh on macOS. Recent commands, oldest first:\n# cwd: /tmp\n"
+            format!("# zsh on {os}. Recent commands, oldest first:\n# cwd: /tmp\n")
+        );
+    }
+
+    #[test]
+    fn transcript_passes_the_captured_screen_through() {
+        let context =
+            Context { cwd: "/tmp".into(), screen: "$ make\nok".into(), ..Context::default() };
+        let transcript = context.transcript();
+        assert!(
+            transcript
+                .contains("# Terminal screen, newest output at the bottom:\n$ make\nok\n# cwd"),
+            "{transcript}"
         );
     }
 
@@ -280,12 +297,12 @@ mod tests {
     async fn gather_survives_missing_cwd_and_history() {
         let sources = Sources {
             cwd: "/nonexistent/wisp".into(),
-            pane: String::new(),
+            terminal: Terminal::default(),
             histfile: Some("/nonexistent/history".into()),
         };
         let context = Context::gather(&sources, &[finished("oops", 2)]).await;
-        assert!(context.files.is_empty());
-        assert!(context.git_branch.is_empty());
+        assert_eq!(context.files, Vec::<String>::new());
+        assert_eq!(context.git_branch, "");
         assert_eq!(context.history, ["oops"]);
         assert_eq!(context.last_failure, Some(finished("oops", 2)));
     }

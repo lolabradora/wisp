@@ -3,20 +3,43 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>wisp · finishes the names already on your screen</title>
-  <meta name="description" content="Ghost-text command suggestions for zsh from a small model that runs on your Mac and reads the terminal output above your prompt.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'">
+  <title>wisp: zsh suggestions that finish the names on your screen</title>
+  <meta name="description" content="Grey ghost-text command suggestions for zsh from a small local model that reads your terminal screen. Runs on macOS and Linux. Nothing leaves your machine. MIT licensed.">
+  <link rel="canonical" href="https://lolabradora.github.io/wisp/">
   <meta name="theme-color" content="#0a0a18">
+  <meta name="color-scheme" content="dark">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="wisp">
+  <meta property="og:url" content="https://lolabradora.github.io/wisp/">
+  <meta property="og:title" content="wisp: zsh suggestions that finish the names on your screen">
+  <meta property="og:description" content="Grey ghost-text command suggestions for zsh from a small local model that reads your terminal screen. macOS and Linux. Nothing leaves your machine.">
+  <meta property="og:image" content="https://lolabradora.github.io/wisp/assets/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="A terminal line reading kubectl logs -n billing api, completed in glowing orange with the pod name -7d9f8b6c4-x2kqp. Below: wisp finishes the names already on your screen.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="wisp: zsh suggestions that finish the names on your screen">
+  <meta name="twitter:description" content="Grey ghost-text command suggestions for zsh from a small local model that reads your terminal screen. macOS and Linux. Nothing leaves your machine.">
+  <meta name="twitter:image" content="https://lolabradora.github.io/wisp/assets/og.png">
+
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="preload" href="assets/fonts/barlow-condensed-500.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/mplus1code.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="assets/style.css">
+  <script src="assets/main.js" defer></script>
 </head>
 <body>
   <a class="skip" href="#install">Skip to install</a>
 
   <header class="masthead">
     <a class="wordmark" href="#top" aria-label="wisp, back to top">wisp</a>
-    <a class="nav-link" href="https://github.com/micovi/wisp">GitHub</a>
+    <nav class="nav" aria-label="Site">
+      <a class="nav-link" href="#install">Install</a>
+      <a class="nav-link" href="https://github.com/lolabradora/wisp/wiki">Docs</a>
+      <a class="nav-link" href="https://github.com/lolabradora/wisp">GitHub</a>
+    </nav>
   </header>
 
   <main id="top">
@@ -28,12 +51,15 @@
       </picture>
 
       <div class="tube" data-cycle>
-        <p class="sr-only" data-tube-description>
-          Example: you type kubectl logs -n billing api, and wisp suggests -7d9f8b6c4-x2kqp, the pod name from the kubectl get pods output above.
+        <p class="sr-only">
+          Example: kubectl get pods has just listed a crash-looping pod named api-7d9f8b6c4-x2kqp. You type kubectl logs -n billing api, and wisp suggests the rest of that name, -7d9f8b6c4-x2kqp.
         </p>
         <div class="line" aria-hidden="true">
+          <pre class="seen" data-seen>$ kubectl get pods -n billing
+<mark class="lit">api-7d9f8b6c4-x2kqp</mark>      0/1  CrashLoopBackOff
+worker-5c8d7f9b6-mn4lz   1/1  Running</pre>
           <p class="command"><span class="sigil">$</span> <span data-typed>kubectl logs -n billing api</span><span class="caret"></span></p>
-          <div class="stack">
+          <div class="stack" data-stack>
             <ul class="ghosts" data-ghosts>
               <li>-worker-5c8d</li>
               <li>-gateway</li>
@@ -43,15 +69,23 @@
             <p class="afterglow" data-afterglow></p>
           </div>
         </div>
+        <button type="button" class="demo-toggle" data-demo-toggle data-js aria-pressed="false">Pause demo</button>
       </div>
 
       <div class="pitch">
         <h1 id="hero-title"><span>It finishes the names already</span> <span>on your screen.</span></h1>
-        <p class="sub">Ghost-text suggestions for zsh. The model runs on your Mac.</p>
-        <a class="pill" href="#install">
-          Install from GitHub
-          <svg class="pill-mark" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-        </a>
+        <p class="sub">Ghost-text suggestions for zsh. The model runs on your machine, on macOS or Linux.</p>
+        <div class="cmd hero-cmd">
+          <code>curl -fsSL https://raw.githubusercontent.com/lolabradora/wisp/main/install.sh | sh</code>
+          <p class="hero-actions">
+            <button type="button" class="copy-primary" data-copy data-js>Copy command</button>
+            <a class="pill pill-quiet" href="https://github.com/lolabradora/wisp">
+              <svg class="pill-mark" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+              GitHub
+            </a>
+            <a class="text-link" href="#install">All four install steps</a>
+          </p>
+        </div>
       </div>
     </section>
 
@@ -59,25 +93,28 @@
       <div class="source-copy">
         <h2 id="source-title">It reads what just scrolled past.</h2>
         <p>
-          zsh-autosuggestions only knows your history. wisp also reads the last 60 lines of your
-          terminal, the files in the directory, and your git branches. The pod that is crash-looping,
-          the compose file you just listed, the PID holding port 3000: those names are
-          one <kbd>→</kbd> away.
+          Shell history only knows what you have typed before. wisp also reads the last 60 lines
+          of your terminal, the files in the directory and your git branches. The pod that is
+          crash-looping, the compose file you just listed, the PID holding port 3000: each of
+          those names is one <kbd>→</kbd> away.
         </p>
       </div>
 
       <div class="screen" data-screen>
-        <div class="scenario-picker" role="tablist" aria-label="Examples">
-          <button role="tab" aria-selected="true" data-scenario="kubectl">kubectl</button>
-          <button role="tab" aria-selected="false" data-scenario="compose">compose</button>
-          <button role="tab" aria-selected="false" data-scenario="git">git</button>
-          <button role="tab" aria-selected="false" data-scenario="trace">stack trace</button>
-          <button role="tab" aria-selected="false" data-scenario="lsof">lsof</button>
-          <button role="tab" aria-selected="false" data-scenario="docker">docker</button>
+        <div class="scenario-picker" role="tablist" aria-label="Examples" data-js>
+          <button type="button" role="tab" id="tab-kubectl" aria-controls="scenario-panel" aria-selected="true" data-scenario="kubectl">kubectl</button>
+          <button type="button" role="tab" id="tab-compose" aria-controls="scenario-panel" aria-selected="false" tabindex="-1" data-scenario="compose">compose</button>
+          <button type="button" role="tab" id="tab-git" aria-controls="scenario-panel" aria-selected="false" tabindex="-1" data-scenario="git">git</button>
+          <button type="button" role="tab" id="tab-trace" aria-controls="scenario-panel" aria-selected="false" tabindex="-1" data-scenario="trace">stack trace</button>
+          <button type="button" role="tab" id="tab-lsof" aria-controls="scenario-panel" aria-selected="false" tabindex="-1" data-scenario="lsof">lsof</button>
+          <button type="button" role="tab" id="tab-docker" aria-controls="scenario-panel" aria-selected="false" tabindex="-1" data-scenario="docker">docker</button>
         </div>
-        <div class="terminal" role="tabpanel" aria-live="polite">
-          <pre class="output" data-output></pre>
-          <p class="prompt-line"><span class="sigil">$</span> <span data-prompt-typed></span><span class="completion" data-prompt-completion></span></p>
+        <div class="terminal" role="tabpanel" id="scenario-panel" aria-labelledby="tab-kubectl" aria-live="polite" data-panel>
+          <pre class="output" data-output tabindex="0">$ kubectl get pods -n billing
+NAME                        READY   STATUS             RESTARTS
+<mark>api-7d9f8b6c4-x2kqp</mark>         0/1     CrashLoopBackOff   12
+worker-5c8d7f9b6-mn4lz      1/1     Running            0</pre>
+          <p class="prompt-line"><span class="sigil">$</span> <span data-prompt-typed>kubectl logs -n billing api</span><span class="completion" data-prompt-completion>-7d9f8b6c4-x2kqp</span></p>
         </div>
         <p class="footnote">
           Completions are what Qwen2.5-Coder produced in wisp’s test scenarios. The terminal output
@@ -86,77 +123,251 @@
       </div>
     </section>
 
+    <section class="terminals" aria-labelledby="terminals-title">
+      <h2 id="terminals-title">Does it work in your terminal?</h2>
+      <p class="lead">
+        wisp works in any terminal emulator on macOS and Linux. To read the screen it needs
+        one of these four sources.
+      </p>
+      <dl class="sources">
+        <div class="source-row">
+          <dt>tmux</dt>
+          <dd>
+            <p>Any terminal emulator: Ghostty, iTerm2, Alacritty, Terminal.app and others. If your shell runs inside tmux, wisp reads the pane. There is nothing to configure.</p>
+            <code>tmux capture-pane -p -J -t &lt;pane&gt; -S -60</code>
+          </dd>
+        </div>
+        <div class="source-row">
+          <dt>WezTerm</dt>
+          <dd>
+            <p>wisp asks WezTerm for the text of the current pane. There is nothing to configure.</p>
+            <code>wezterm cli get-text --pane-id &lt;pane&gt; --start-line -60</code>
+          </dd>
+        </div>
+        <div class="source-row">
+          <dt>kitty <span class="flag">experimental</span></dt>
+          <dd>
+            <p>Needs <code>allow_remote_control</code> and <code>listen_on</code> in <code>kitty.conf</code>. This source follows kitty’s remote-control documentation and has not been verified on a real kitty install.</p>
+            <code>kitty @ get-text --match id:&lt;window&gt; --extent screen</code>
+          </dd>
+        </div>
+        <div class="source-row">
+          <dt>Anything else</dt>
+          <dd>
+            <p>Set <code>WISP_SCREEN_CMD</code> to a command that prints your screen as plain text. It takes priority over the other three.</p>
+            <code>export WISP_SCREEN_CMD='your-terminal dump-screen'</code>
+          </dd>
+        </div>
+      </dl>
+      <p class="aside">
+        With no screen source, for example a bare Ghostty or Terminal.app window outside tmux,
+        wisp still completes from your shell history, the files in the current directory, your
+        git branches and the commands you ran this session with their exit codes.
+        <code>wisp doctor</code> names the source it found for the current shell.
+      </p>
+      <p><a class="text-link" href="https://github.com/lolabradora/wisp/wiki/Terminal-support">Terminal support in the docs</a></p>
+    </section>
+
+    <section class="how" aria-labelledby="how-title">
+      <div class="how-copy">
+        <h2 id="how-title">How it works</h2>
+        <p>
+          A zsh plugin talks to a small daemon over a Unix socket. The daemon builds a prompt
+          from your screen, history, directory and branches, then asks llama-server on
+          <code>127.0.0.1</code> to continue the line.
+        </p>
+        <p><a class="text-link" href="https://github.com/lolabradora/wisp/wiki/How-it-works">How it works, in the docs</a></p>
+      </div>
+      <ul class="behaviours">
+        <li><strong>After a command</strong> wisp predicts the next one while the prompt is still empty.</li>
+        <li><strong>While you type</strong> it completes the line after a 60 ms pause, and keeps the suggestion for as long as you type along with it.</li>
+        <li><strong>Mid-word</strong> the half-typed word goes through a grammar, so the model has to continue <code>feat/p</code> and cannot start a different word. This is token healing. It took the 3B model from 3/8 to 7/8 in the eval below.</li>
+        <li><strong>To accept</strong> press <kbd>→</kbd>, <kbd>End</kbd> or <span class="keys"><kbd>Ctrl</kbd>&thinsp;<kbd>F</kbd></span>. <span class="keys"><kbd>Alt</kbd>&thinsp;<kbd>F</kbd></span> takes one word. If zsh-autosuggestions is loaded, wisp suggests through it and your keys stay as they are.</li>
+      </ul>
+    </section>
+
     <section class="figures" aria-labelledby="figures-title">
       <img class="gauze-band" src="assets/plates/gauze-band.webp" alt="" width="2304" height="720" loading="lazy" decoding="async">
-      <h2 id="figures-title">Measured, not promised.</h2>
+      <h2 id="figures-title">Measured on one Mac.</h2>
       <dl class="readouts">
         <div class="readout">
-          <dt>Names found only on screen, out of eight</dt>
+          <dt>Eval: names found on screen</dt>
           <dd>
-            <span class="tube-digits" aria-label="7 out of 8, up from 3">
-              <span class="ghost-digit" aria-hidden="true">3</span><span class="lit-digit">7</span><span class="slash">/8</span>
+            <span class="tube-digits" role="img" aria-label="7 out of 8, up from 3">
+              <span class="ghost-digit" aria-hidden="true">3</span><span class="lit-digit" aria-hidden="true">7</span><span class="slash" aria-hidden="true">/8</span>
             </span>
-            <span class="readout-note">Qwen2.5-Coder 3B with token healing. Without it: 3/8. The 1.5B model went from 4/8 to 6/8.</span>
+            <span class="readout-note">Qwen2.5-Coder 3B with token healing. Without it, 3/8.</span>
           </dd>
         </div>
         <div class="readout">
           <dt>Latency while you type</dt>
           <dd>
             <span class="tube-digits"><span class="lit-digit">50–120</span><span class="slash">ms</span></span>
-            <span class="readout-note">1.5B, with the prompt cached between keystrokes. The 3B model takes 150–450 ms and writes longer suggestions.</span>
+            <span class="readout-note">Qwen2.5-Coder 1.5B, the default, with the prompt cached between keystrokes.</span>
+          </dd>
+        </div>
+        <div class="readout">
+          <dt>Memory with the model loaded</dt>
+          <dd>
+            <span class="tube-digits"><span class="lit-digit">4.3</span><span class="slash">GB</span></span>
+            <span class="readout-note">llama-server with the 3B model. The 1.5B server has not been measured.</span>
           </dd>
         </div>
       </dl>
-      <p class="footnote">Internal measurements on an Apple M5 with 24 GB. Run <code>wisp complete</code> to measure your own.</p>
+
+      <table class="ledger">
+        <caption class="sr-only">All measured figures by model</caption>
+        <thead>
+          <tr>
+            <td></td>
+            <th scope="col">1.5B <span class="th-note">default</span></th>
+            <th scope="col">3B</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Eval without token healing</th>
+            <td>4/8</td>
+            <td>3/8</td>
+          </tr>
+          <tr>
+            <th scope="row">Eval with token healing</th>
+            <td>6/8</td>
+            <td>7/8</td>
+          </tr>
+          <tr>
+            <th scope="row">Latency while typing, prompt cached</th>
+            <td>50–120 ms</td>
+            <td>150–450 ms</td>
+          </tr>
+          <tr>
+            <th scope="row">llama-server memory</th>
+            <td>not measured</td>
+            <td>4.3 GB</td>
+          </tr>
+          <tr>
+            <th scope="row">Model download</th>
+            <td>1.65 GB</td>
+            <td>3.3 GB</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p class="footnote">
+        Internal measurements on an Apple M5 with 24 GB. The first request after a command has no
+        cached prompt and took 180–280 ms. The eval is eight scenarios where the right answer
+        appears only in terminal output: a compose file, a git branch, a failing test, a pod name,
+        a stack-trace path, a PID, the next command after <code>git add</code>, and a container
+        name. Run <code>wisp complete</code> and <code>wisp status</code> to measure your own.
+      </p>
     </section>
 
     <section class="local" aria-labelledby="local-title">
-      <h2 id="local-title">Nothing you type leaves your Mac.</h2>
+      <h2 id="local-title">Nothing you type leaves your machine.</h2>
       <div class="local-grid">
         <p>
-          The model is Qwen2.5-Coder, served by llama.cpp on <code>127.0.0.1</code> and kept running
-          by launchd. Your screen, history and keystrokes go to that process and nowhere else. There is
-          no account and no API key.
+          The model is Qwen2.5-Coder, served by llama.cpp on <code>127.0.0.1:8012</code> and kept
+          running by launchd on macOS or a systemd user unit on Linux. Your screen, history and
+          keystrokes go to that process and nowhere else. There is no account and no API key.
         </p>
         <p>
-          A menu bar item shows the loaded model, the median latency and the last ten suggestions.
-          <code>wisp pause</code> turns suggestions off until you say <code>wisp resume</code>.
+          The network is used during install only: <code>install.sh</code> fetches the binary
+          from GitHub, and llama.cpp fetches the model weights from Hugging Face. After that
+          wisp works offline.
+        </p>
+        <p>
+          <code>wisp pause</code> stops suggestions until you run <code>wisp resume</code>.
+          <code>wisp status</code> shows the loaded model, the latency and recent suggestions.
+          On macOS, <code>wisp setup --menubar</code> puts the same readout in the menu bar.
         </p>
       </div>
-      <ul class="behaviours">
-        <li><strong>After a command</strong> wisp predicts the next one while the prompt is still empty.</li>
-        <li><strong>While you type</strong> it completes the line after a 60 ms pause, and keeps the suggestion as long as you type along with it.</li>
-        <li><strong>To accept</strong> press <kbd>→</kbd>, <kbd>End</kbd> or <kbd>Ctrl</kbd>&thinsp;<kbd>F</kbd>, the keys zsh-autosuggestions already taught your hands.</li>
+    </section>
+
+    <section class="limits" aria-labelledby="limits-title">
+      <h2 id="limits-title">Know the limits before you install.</h2>
+      <ul class="limit-list">
+        <li><strong>zsh only.</strong> bash and fish are not supported.</li>
+        <li><strong>Screen reading needs a source.</strong> That means tmux, WezTerm, kitty or your own command. Without one, suggestions come from history, files and git, and a name that only appeared in output is out of reach.</li>
+        <li><strong>kitty is experimental.</strong> Nobody has verified it on a real kitty install yet. Reports are welcome.</li>
+        <li><strong>The model takes RAM.</strong> Budget roughly 2 to 4.5 GB while it is loaded. We measured about 4.3 GB for 3B. The low end is an estimate from the 1.65 GB file of the 1.5B model.</li>
+        <li><strong>The menu bar item is macOS only.</strong> On Linux, <code>wisp status</code> prints the same information.</li>
+        <li><strong>It is wrong sometimes.</strong> The best score on our own eight scenarios is 7/8, and eight scenarios is a small eval. A wrong suggestion stays grey until you accept it.</li>
+        <li><strong>One machine measured.</strong> Every number on this page comes from an Apple M5. We have no figures for Linux or Intel Macs.</li>
       </ul>
+      <p class="aside">
+        More in the
+        <a class="text-link" href="https://github.com/lolabradora/wisp/wiki/FAQ">FAQ</a> and
+        <a class="text-link" href="https://github.com/lolabradora/wisp/wiki/Troubleshooting">Troubleshooting</a>.
+      </p>
     </section>
 
     <section class="install" id="install" aria-labelledby="install-title">
       <h2 id="install-title">Install</h2>
-      <p class="requirements">macOS on Apple Silicon, zsh with zsh-autosuggestions, and a Rust toolchain. Screen reading needs WezTerm; other terminals get history, files and git.</p>
+      <p class="requirements">You need macOS or Linux, zsh, and llama.cpp. zsh-autosuggestions is optional.</p>
       <ol class="steps">
         <li>
-          <p>Get llama.cpp and download the model once (1.65 GB). Stop it with Ctrl-C when it says <em>server is listening</em>.</p>
-          <div class="cmd"><code>brew install llama.cpp &amp;&amp; llama-server --fim-qwen-1.5b-default</code><button type="button" data-copy>Copy</button></div>
+          <div class="step">
+            <p>Install llama.cpp. On Linux without Homebrew, take a <a class="text-link" href="https://github.com/ggml-org/llama.cpp/releases">llama.cpp release binary</a> and put <code>llama-server</code> on your <code>PATH</code>.</p>
+            <div class="cmd"><code>brew install llama.cpp</code><button type="button" data-copy data-js>Copy</button></div>
+          </div>
         </li>
         <li>
-          <p>Build wisp and keep llama-server running at login.</p>
-          <div class="cmd"><code>git clone https://github.com/micovi/wisp &amp;&amp; cd wisp &amp;&amp; cargo install --path . &amp;&amp; ./scripts/install-llama-service.sh</code><button type="button" data-copy>Copy</button></div>
+          <div class="step">
+            <p>Install wisp. The script puts a prebuilt binary for your OS and CPU in <code>~/.local/bin</code>. You can <a class="text-link" href="https://github.com/lolabradora/wisp/blob/main/install.sh">read install.sh</a> first.</p>
+            <div class="cmd"><code>curl -fsSL https://raw.githubusercontent.com/lolabradora/wisp/main/install.sh | sh</code><button type="button" data-copy data-js>Copy</button></div>
+            <p>Or build it yourself with a Rust toolchain.</p>
+            <div class="cmd"><code>cargo install --git https://github.com/lolabradora/wisp</code><button type="button" data-copy data-js>Copy</button></div>
+          </div>
         </li>
         <li>
-          <p>Load the plugin after zsh-autosuggestions, then open a new tab.</p>
-          <div class="cmd"><code>echo 'eval "$(wisp init zsh)"' &gt;&gt; ~/.zshrc</code><button type="button" data-copy>Copy</button></div>
+          <div class="step">
+            <p>Download the model (1.65 GB, once) and start the background service that keeps llama-server running. <code>wisp setup --model 3b</code> picks the larger model.</p>
+            <div class="cmd"><code>wisp setup</code><button type="button" data-copy data-js>Copy</button></div>
+          </div>
+        </li>
+        <li>
+          <div class="step">
+            <p>Load the plugin, then open a new shell. If you use zsh-autosuggestions, put this line after it.</p>
+            <div class="cmd"><code>echo 'eval "$(wisp init zsh)"' &gt;&gt; ~/.zshrc</code><button type="button" data-copy data-js>Copy</button></div>
+          </div>
         </li>
       </ol>
-      <a class="pill" href="https://github.com/micovi/wisp">Read the source on GitHub</a>
+
+      <div class="check">
+        <h3>Is it working?</h3>
+        <p>
+          <code>wisp doctor</code> checks llama-server, the model, the daemon, your
+          <code>~/.zshrc</code> and the screen source for this shell. Each failed check comes
+          with a fix hint. To remove wisp’s background services later, run
+          <code>wisp uninstall</code>.
+        </p>
+        <div class="cmd"><code>wisp doctor</code><button type="button" data-copy data-js>Copy</button></div>
+      </div>
+
+      <p class="install-links">
+        <a class="pill" href="https://github.com/lolabradora/wisp">
+          Read the source on GitHub
+          <svg class="pill-mark" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        </a>
+        <a class="text-link" href="https://github.com/lolabradora/wisp/wiki/Installation">Installation guide</a>
+        <a class="text-link" href="https://github.com/lolabradora/wisp/wiki/Troubleshooting">Troubleshooting</a>
+      </p>
     </section>
   </main>
 
   <footer class="colophon">
     <span class="wordmark">wisp</span>
-    <span>MIT licensed. Built with llama.cpp and Qwen2.5-Coder.</span>
-    <a href="https://github.com/micovi/wisp">github.com/micovi/wisp</a>
+    <span>MIT licensed. Made by <a href="https://github.com/lolabradora">HEYLOLA</a>. Built with llama.cpp and Qwen2.5-Coder.</span>
+    <nav class="colophon-nav" aria-label="Docs and source">
+      <a href="https://github.com/lolabradora/wisp">GitHub</a>
+      <a href="https://github.com/lolabradora/wisp/wiki/Installation">Installation</a>
+      <a href="https://github.com/lolabradora/wisp/wiki/Terminal-support">Terminal support</a>
+      <a href="https://github.com/lolabradora/wisp/wiki/How-it-works">How it works</a>
+      <a href="https://github.com/lolabradora/wisp/wiki/Troubleshooting">Troubleshooting</a>
+      <a href="https://github.com/lolabradora/wisp/wiki/FAQ">FAQ</a>
+    </nav>
   </footer>
 
-  <script src="assets/main.js" defer></script>
+  <p class="sr-only" role="status" data-status></p>
 </body>
 </html>

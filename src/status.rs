@@ -25,7 +25,7 @@ pub struct Report {
     /// `None` when no daemon is running; the next shell prompt starts one.
     pub daemon: Option<DaemonStats>,
     pub llama: LlamaStatus,
-    /// Resident memory of the launchd-managed llama-server, when it runs under launchd.
+    /// Resident memory of llama-server, when it runs as the service `wisp setup` installed.
     pub llama_memory_mb: Option<u64>,
 }
 
@@ -60,12 +60,12 @@ async fn query_daemon(socket: &Path) -> anyhow::Result<DaemonStats> {
     tokio::time::timeout(DAEMON_TIMEOUT, exchange).await.context("daemon did not answer")?
 }
 
-/// `gui/<uid>/<label>`, the launchctl name of one of this user's agents.
+/// `gui/<uid>`, the launchd domain this user's agents live in.
 ///
 /// # Errors
 ///
 /// Returns an error if `id -u` cannot be run.
-pub fn launchd_target(label: &str) -> anyhow::Result<String> {
+pub fn launchd_domain() -> anyhow::Result<String> {
     static UID: OnceLock<String> = OnceLock::new();
     let uid = if let Some(uid) = UID.get() {
         uid
@@ -74,22 +74,48 @@ pub fn launchd_target(label: &str) -> anyhow::Result<String> {
             std::process::Command::new("id").arg("-u").output().context("running id -u")?;
         UID.get_or_init(|| String::from_utf8_lossy(&output.stdout).trim().to_owned())
     };
-    Ok(format!("gui/{uid}/{label}"))
+    Ok(format!("gui/{uid}"))
+}
+
+/// `gui/<uid>/<label>`, the launchctl name of one of this user's agents.
+///
+/// # Errors
+///
+/// Returns an error if `id -u` cannot be run.
+pub fn launchd_target(label: &str) -> anyhow::Result<String> {
+    Ok(format!("{}/{label}", launchd_domain()?))
 }
 
 async fn llama_memory_mb() -> anyhow::Result<u64> {
-    let target = launchd_target(paths::LLAMA_AGENT)?;
-    let agent = Command::new("launchctl").args(["print", &target]).output().await?;
-    let agent = String::from_utf8_lossy(&agent.stdout);
-    let pid = agent
-        .lines()
-        .find_map(|line| line.trim().strip_prefix("pid = "))
-        .context("llama-server agent is not running")?
-        .to_owned();
+    let pid = llama_pid().await?;
     let ps = Command::new("ps").args(["-o", "rss=", "-p", &pid]).output().await?;
     let kilobytes: u64 =
         String::from_utf8_lossy(&ps.stdout).trim().parse().context("parsing ps")?;
     Ok(kilobytes / 1024)
+}
+
+/// The pid of the llama-server that launchd keeps running.
+#[cfg(target_os = "macos")]
+async fn llama_pid() -> anyhow::Result<String> {
+    let target = launchd_target(paths::LLAMA_AGENT)?;
+    let agent = Command::new("launchctl").args(["print", &target]).output().await?;
+    let agent = String::from_utf8_lossy(&agent.stdout);
+    agent
+        .lines()
+        .find_map(|line| line.trim().strip_prefix("pid = "))
+        .map(str::to_owned)
+        .context("llama-server agent is not running")
+}
+
+/// The pid of the llama-server that systemd keeps running.
+#[cfg(not(target_os = "macos"))]
+async fn llama_pid() -> anyhow::Result<String> {
+    let args = ["--user", "show", "--property", "MainPID", "--value", paths::LLAMA_UNIT];
+    let unit = Command::new("systemctl").args(args).output().await?;
+    let pid = String::from_utf8_lossy(&unit.stdout).trim().to_owned();
+    // systemd reports pid 0 for a unit that is not running.
+    anyhow::ensure!(!pid.is_empty() && pid != "0", "llama-server unit is not running");
+    Ok(pid)
 }
 
 /// Human-readable lines, used by both `wisp status` and the menu.
@@ -285,7 +311,7 @@ mod tests {
         assert_eq!(summary.title, "wisp ⚠");
         assert_eq!(summary.llama, "llama-server: down (no llama-server at x)");
         assert_eq!(summary.daemon, "daemon: not running (starts with the next shell prompt)");
-        assert!(summary.recent.is_empty());
+        assert_eq!(summary.recent, Vec::<String>::new());
     }
 
     #[test]

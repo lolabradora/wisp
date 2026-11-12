@@ -134,8 +134,8 @@ mod tests {
 
     #[test]
     fn empty_input_gives_no_commands() {
-        assert!(recent_commands(b"", 10).is_empty());
-        assert!(recent_commands(b"\n\n", 10).is_empty());
+        assert_eq!(recent_commands(b"", 10), Vec::<String>::new());
+        assert_eq!(recent_commands(b"\n\n", 10), Vec::<String>::new());
     }
 
     #[tokio::test]

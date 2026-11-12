@@ -20,6 +20,7 @@ use tokio::task::JoinHandle;
 
 use crate::context::{Context, FinishedCommand, Sources};
 use crate::model::LlamaClient;
+use crate::screen::Terminal;
 use crate::stats::{DaemonStats, Recorder};
 
 const SESSION_COMMAND_LIMIT: usize = 20;
@@ -33,10 +34,15 @@ pub enum ClientMsg {
         cmd: String,
         status: i32,
         cwd: String,
+        /// `WezTerm` pane id. Plugins older than 0.2 send only this; newer ones also send `term`.
         #[serde(default)]
         pane: String,
         #[serde(default)]
         histfile: String,
+        /// What the shell knows about its terminal, for reading the screen. Boxed because it is
+        /// several times the size of the other messages.
+        #[serde(default)]
+        term: Option<Box<Terminal>>,
     },
     /// The command line changed; `buf` is everything left of the cursor.
     Req { seq: u64, buf: String },
@@ -163,7 +169,7 @@ impl Session {
         self.cancel();
         match msg {
             ClientMsg::Status => self.send_status(),
-            ClientMsg::Done { seq, cmd, status, cwd, pane, histfile } => {
+            ClientMsg::Done { seq, cmd, status, cwd, pane, histfile, term } => {
                 self.set_last_suggestion(None);
                 if !cmd.trim().is_empty() {
                     self.finished.push(FinishedCommand { command: cmd, status });
@@ -174,7 +180,8 @@ impl Session {
                     return;
                 }
                 let histfile = Some(PathBuf::from(histfile)).filter(|p| !p.as_os_str().is_empty());
-                let sources = Sources { cwd: cwd.into(), pane, histfile };
+                let terminal = terminal_of(term, pane);
+                let sources = Sources { cwd: cwd.into(), terminal, histfile };
                 self.context = Arc::new(Context::gather(&sources, &self.finished).await);
                 // Predict the next command while the prompt is still empty.
                 self.suggest(seq, String::new(), Duration::ZERO);
@@ -269,6 +276,12 @@ impl Session {
     }
 }
 
+/// The terminal of the shell that sent a `done` message. Plugins older than 0.2 send no `term`,
+/// only the `WezTerm` pane id; a shell that still runs one keeps its screen context.
+fn terminal_of(term: Option<Box<Terminal>>, legacy_pane: String) -> Terminal {
+    term.map_or_else(|| Terminal::from_wezterm_pane(legacy_pane), |term| *term)
+}
+
 fn send_reply(replies: &mpsc::UnboundedSender<String>, seq: u64, suggestion: &str) {
     // Fails only when the connection is closing, in which case nobody wants the reply.
     let _ = replies.send(format!("{seq}\t{suggestion}\n"));
@@ -290,8 +303,44 @@ mod tests {
             cwd: "/tmp".into(),
             pane: String::new(),
             histfile: String::new(),
+            term: None,
         };
         assert_eq!(msg, expected);
+    }
+
+    #[test]
+    fn parses_the_terminal_of_a_done_message_with_missing_fields_empty() {
+        let msg: ClientMsg = serde_json::from_str(
+            r#"{"t":"done","seq":3,"cmd":"ls","status":0,"cwd":"/tmp","pane":"4",
+                "term":{"tmux":"/tmp/tmux-501/default,91,0","tmux_pane":"%2","wezterm_pane":"4"}}"#,
+        )
+        .unwrap();
+        let ClientMsg::Done { term, .. } = msg else {
+            panic!("expected a done message, got {msg:?}");
+        };
+        let expected = Terminal {
+            tmux: "/tmp/tmux-501/default,91,0".into(),
+            tmux_pane: "%2".into(),
+            wezterm_pane: "4".into(),
+            ..Terminal::default()
+        };
+        assert_eq!(term, Some(Box::new(expected)));
+    }
+
+    #[test]
+    fn the_legacy_pane_is_used_only_when_the_message_has_no_terminal() {
+        use crate::screen::Source;
+        let legacy = terminal_of(None, "7".into());
+        assert_eq!(legacy, Terminal { wezterm_pane: "7".into(), ..Terminal::default() });
+        assert_eq!(legacy.source(), Some(Source::WezTerm));
+
+        let in_tmux = Terminal {
+            tmux: "/tmp/tmux-501/default,91,0".into(),
+            tmux_pane: "%2".into(),
+            ..Terminal::default()
+        };
+        assert_eq!(terminal_of(Some(Box::new(in_tmux.clone())), "7".into()), in_tmux);
+        assert_eq!(terminal_of(Some(Box::default()), "7".into()).source(), None);
     }
 
     #[test]

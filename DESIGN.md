@@ -1,6 +1,6 @@
 ---
 name: wisp
-description: Ghost-text command suggestions for zsh from a small model that runs on your Mac.
+description: Ghost-text command suggestions for zsh from a small local model that reads your terminal screen.
 colors:
   ink: "#0a0a18"
   ink-deep: "#07070f"
@@ -65,6 +65,13 @@ components:
     rounded: "{rounded.pill}"
     padding: "0.3em 0.9em"
   button-copy-hover:
+    textColor: "{colors.cathode}"
+  button-pill-quiet:
+    backgroundColor: "transparent"
+    textColor: "{colors.bone}"
+    rounded: "{rounded.pill}"
+    padding: "0.5em 1.1em"
+  button-pill-quiet-hover:
     textColor: "{colors.cathode}"
   tab-scenario-selected:
     backgroundColor: "transparent"
@@ -132,9 +139,10 @@ A near-black ink field, warm bone type, and one incandescent orange that means "
 **Character:** A tall condensed grotesque for headings and tube numerals against a round, open Japanese-designed sans and its matching code mono. The mono is not a costume: every mono string on the page is a real command, a real completion, or a label on a measurement.
 
 ### Hierarchy
-- **Display** (Barlow Condensed 400, clamp(5rem, 11vw, 12.5rem), line-height 1): tube numerals in the measured readouts. Step numbers use the same face at 3.25rem (2.5rem on phones) in cathode.
-- **Headline** (Barlow Condensed 500, clamp(2.5rem, 5.2vw, 5rem), line-height 1, 0.01em): one per section, balanced wrap. The hero headline is the same face at a comp-scaled max(47 comp-px, 2.1rem), line-height 1.12, 3.4rem on phones.
-- **Command** (M PLUS 1 Code 500, max(50 comp-px, 1.5rem), line-height 1.1, -0.04em): the hero command line. The struck completion is 500 at 37 comp-px with 0.015em tracking; ghost candidates are 300 at 36 comp-px. The demo prompt line runs clamp(1.1rem, 2.2vw, 1.9rem).
+- **Display** (Barlow Condensed 400, clamp(5rem, 11vw, 12.5rem), line-height 1; clamp(5rem, 7.2vw, 8.25rem) when the three readouts sit side by side above 1100px): tube numerals in the measured readouts. Step numbers use the same face at 3.25rem (2.5rem on phones) in cathode.
+- **Headline** (Barlow Condensed 500, clamp(2.5rem, 5.2vw, 5rem), line-height 1, 0.01em): one per section, balanced wrap. The hero headline is the same face at a comp-scaled max(47 comp-px, 2.1rem), line-height 1.12; 3.1rem at line-height 1.06 on phones.
+- **Subhead** (Barlow Condensed 500, clamp(1.75rem, 2.6vw, 2.25rem), line-height 1.05): the names in the screen-source index (tmux, WezTerm, kitty, Anything else) and the "Is it working?" check. A qualifier such as "experimental" follows the name in the sans at 0.95rem, bone-dim.
+- **Command** (M PLUS 1 Code 500, max(50 comp-px, 1.5rem), line-height 1.1, -0.04em): the hero command line. The struck completion is 500 at 37 comp-px with 0.015em tracking; ghost candidates are 300 at 36 comp-px. The demo prompt line runs clamp(1.1rem, 2.2vw, 1.9rem). The terminal output above the hero command is 400 at max(19 comp-px, 0.8rem) in ash.
 - **Body** (M PLUS 1 400, 1.0625rem, line-height 1.6, tabular numerals): prose capped at 66ch in bone-dim; lead paragraphs and list items step to 1.125rem.
 - **Label** (M PLUS 1 Code 400, 0.95rem): readout terms and scenario tabs (1rem). Footnotes drop to 0.875rem in the sans; the colophon is mono at 0.9rem.
 
@@ -147,9 +155,9 @@ The wordmark is "wisp", always lowercase, set in M PLUS 1 500 (max(36 comp-px, 1
 
 ## Layout
 
-The hero is measured against a 1536×1024 comp: a comp unit (`--u`, 100vw / 1536; 100vw / 390 at 760px and below) scales the hero's type and positions with the viewport. On desktop the command line and pitch sit absolutely at their measured places (line at 16.2% / 36.8%, pitch at 4.5% / 67.5%, 60% wide); the candidate stack hangs from the caret. At 760px and below the hero becomes a bottom-aligned column: command, stack, then pitch, gap 3rem.
+The hero is measured against a 1536×1024 comp: a comp unit (`--u`, 100vw / 1536; 100vw / 390 at 760px and below) scales the hero's type and positions with the viewport. The hero is max(100svh, 880 comp-px) tall so the install command stays above the fold on 16:10 screens. On desktop the command line sits absolutely at its measured place (16.2% / 36.8%) with three lines of terminal output hanging above it and the candidate stack hanging from the caret; the pitch is anchored to the bottom left (4.5% in, 54 comp-px up): headline, subline, the install command, then one row of controls. A "Pause demo" control sits bottom right. At 760px and below the hero becomes a bottom-aligned column: output, command, stack, pause control, then pitch, gap 2.25rem. Every demo frame reserves the same height there, so typing never moves the page.
 
-Below the hero, sections share the plane: `section` top padding, horizontal gutter (never under 1.25rem), max width 1440px, centered. Two-column groups use a 5fr / 7fr split for copy and demo, and equal halves for readouts and the local-first copy, with column-gap. Readouts collapse to one column at 1100px; every grid collapses at 760px. Section headings sit heading-gap above their content. Install steps are a two-column grid (3.5rem numeral column, 2.5rem on phones) with 2.5rem between steps. The colophon closes the page as one wrapped mono row.
+Below the hero, sections share the plane: `section` top padding, horizontal gutter (never under 1.25rem), max width 1440px, centered. Two-column groups use a 5fr / 7fr split: copy and demo, the screen-source index (name left, description and command right), and how-it-works. The three readouts share a 3fr / 5fr / 4fr row sized to their numerals, the local-first copy sits in three equal columns, and the limits flow in two text columns. Readouts and the local-first copy collapse to one column at 1100px; every grid collapses at 760px. Section headings sit heading-gap above their content. Install steps are a two-column grid (3.5rem numeral column, 2.5rem on phones) with 2.5rem between steps. The colophon closes the page as one wrapped mono row.
 
 **The Space Not Boxes Rule.** Groups are separated by section space and column gap. There are no cards, panels, dividers or horizontal rules.
 
@@ -173,24 +181,34 @@ Almost nothing on the page has a silhouette. The only outlined shapes are the fu
 ### Buttons
 Outlined, rounded, mono-set; they fill only when you reach for them.
 - **Shape:** fully rounded pill (999px).
-- **Primary pill:** 2px cathode outline, cathode mono 500 text, padding 0.74em 1.3em, optional inline GitHub mark at 1.15em. Used for "Install from GitHub" and "Read the source on GitHub".
+- **Primary pill:** 2px cathode outline, cathode mono 500 text, padding 0.74em 1.3em, optional inline GitHub mark at 1.15em. Used for "Read the source on GitHub" and, at padding 0.5em 1.2em, for "Copy command" under the hero install command, which is the page's primary action.
+- **Quiet pill:** 1px bronze outline, bone mono 500 text, padding 0.5em 1.1em, GitHub mark. The secondary action beside the primary pill. Hover turns text and outline cathode with no fill.
 - **Hover / Focus:** fills cathode with ink text over 160ms ease-out; focus is the global cathode ring.
-- **Copy pill:** 1px bronze outline, bone-dim mono at 0.85rem, padding 0.3em 0.9em. Hover and the copied state turn text and outline cathode over 160ms ease-out.
+- **Copy pill:** 1px bronze outline, bone-dim mono at 0.85rem, padding 0.3em 0.9em, sitting directly after its command. Hover and the copied state turn text and outline cathode over 160ms ease-out. If the clipboard is unavailable the command is selected instead and the pill reads "Selected".
+
+### Links
+- **Text link:** bone text with a 1px bronze underline at 0.25em offset; hover turns both cathode. Used for docs links and links inside prose. Colophon links stay ash mono and turn cathode on hover.
 
 ### Tabs
 - **Scenario tabs:** bare mono words in a wrapping row (gap 0.25rem 1.5rem), no underline or box. The selected tab is cathode; hover lifts an idle tab to bone-dim.
 
 ### Navigation
-- **Masthead:** no bar. Lowercase wordmark top left, one "GitHub" link top right, both bone M PLUS 1 500, sitting directly on the gauze. Links turn cathode on hover.
+- **Masthead:** no bar. Lowercase wordmark top left; Install, Docs and GitHub top right, all bone M PLUS 1 500, sitting directly on the gauze. Links turn cathode on hover.
 
 ### Keycaps
 - **Style:** 1px bronze outline, 4px corners, bone mono at 0.85em, padding 0.05em 0.45em, inline in prose for →, End, Ctrl and F.
 
 ### Command Row
-- **Style:** a bone mono command preceded by a ghost-edge `$ ` sigil, wrapping anywhere, with a copy pill aligned to its baseline (stacked under it on phones). No surrounding box.
+- **Style:** a bone mono command preceded by a ghost-edge `$ ` sigil, wrapping anywhere, with a copy pill right after it on its baseline (stacked under it on phones). No surrounding box. In the hero the command is 500 weight and its controls sit on the row below.
+
+### Source Index
+The screen sources as a typographic index: the name as a Subhead in the left column, one or two sentences and the real command wisp runs in the right. Rows are separated by 2.75rem of space, never by rules.
+
+### Ledger
+Every measured figure by model as a bare table: mono 0.95rem, row labels bone-dim, values bone, column heads bone 500, no borders or fills, max width 48rem. Nothing in it is lit; the tube readouts above it carry the strike.
 
 ### Candidate Stack (signature)
-The hero's command line with its candidates hanging from the caret: a 2px bone caret, unlit candidates as hollow mono (fill #10162a, 1px stroke #3a4a64, weight 300), then the struck completion in cathode with the tube halo. The struck value snaps in, never tweens; the previous value decays over one beat (700ms, cubic-bezier(0.16, 1, 0.3, 1), opacity 0.55 to 0 with a 3px blur) while the next strikes. Real completions cycle every 3.4s after a 5.2s hold. Reduced motion removes the decay.
+The hero's command line with its candidates hanging from the caret: a 2px bone caret, unlit candidates as hollow mono (fill #10162a, 1px stroke #3a4a64, weight 300), then the struck completion in cathode with the tube halo. Three lines of terminal output sit above the command in ash, so the name is on screen before wisp strikes it. The demo plays each real completion as a sequence: the output arrives, the command is typed at 55ms a key, and after a 420ms beat the completion strikes while the same name lights in the output above. The struck value snaps in, never tweens; the previous value decays over one beat (700ms, cubic-bezier(0.16, 1, 0.3, 1), opacity 0.55 to 0 with a 3px blur). Each strike holds 3s; the first frame holds 4.2s. The loop stops while the hero is off screen or the tab is hidden, and a "Pause demo" control (bare ash mono, like a scenario tab) stops it on request. Reduced motion and no-JS show the finished first example and nothing moves.
 
 ### Tube Readout (signature)
 A measured value as a tube numeral: the lit value in cathode display type with the halo, the unit or denominator at 0.42em in bone-dim, and when a before-value exists, the unlit numeral sits in register behind it as a ghost-edge outline (1.5px stroke, no fill). A mono label above and a bone-dim note (max 44ch) below.

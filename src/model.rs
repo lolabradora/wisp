@@ -147,7 +147,9 @@ impl LlamaClient {
             .json(&request)
             .send()
             .await
-            .with_context(|| format!("calling {endpoint} (is llama-server running? see README)"))?
+            .with_context(|| {
+                format!("calling {endpoint} (is llama-server running? try `wisp doctor`)")
+            })?
             .error_for_status()
             .with_context(|| format!("llama-server error from {endpoint}"))?;
         let body: CompletionResponse =

@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "site/index.html"
+        ],
+        "createdAt": "2026-11-12T21:50:37.230Z",
+        "reason": "DESIGN.md Filament Rule: the tube halo on struck cathode text is the approved signature of the committed world (brief: keep the identity)"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "site/assets/style.css"
+        ],
+        "createdAt": "2026-11-12T21:50:37.260Z",
+        "reason": "DESIGN.md Filament Rule: the tube halo on struck cathode text is the approved signature of the committed world (brief: keep the identity)"
+      }
+    ]
+  }
+}
