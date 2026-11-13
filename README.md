@@ -14,7 +14,7 @@ and your git branches.
   `kubectl get pods`, the PID from `lsof`, the path in a stack trace.
 - Everything runs locally. Nothing leaves your machine.
 
-[Landing page](https://lolabradora.github.io/wisp/) · [Wiki](https://github.com/lolabradora/wisp/wiki)
+[Landing page](https://wisp.heylola.ro/) · [Wiki](https://github.com/lolabradora/wisp/wiki)
 
 ## Install
 
