@@ -292,7 +292,7 @@ main > section:last-child { padding-bottom: var(--section); }
 .has-key .key { opacity: 1; }
 .is-press .key { transform: scale(0.94); transition-duration: 80ms; }
 .has-accept .done { opacity: 1; }
-.has-accept .live .caret { opacity: 0; }
+.has-accept .live .caret { opacity: 0; transition: none; } /* one caret at a time */
 /* Hide the typed layer once the accepted line is fully in. A long line can wrap differently in
    the two layers, and leaving both visible would overprint them. */
 .live { transition: opacity 120ms linear; }
