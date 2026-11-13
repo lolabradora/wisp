@@ -1,234 +1,280 @@
 ---
 name: wisp
-description: Ghost-text command suggestions for zsh from a small local model that reads your terminal screen.
+description: Grey ghost-text suggestions for zsh, from a small model on your own machine. HEYLOLA paper system, light only.
 colors:
-  ink: "#0a0a18"
-  ink-deep: "#07070f"
-  bone: "#f3ecdc"
-  bone-dim: "#b9b3a6"
-  ash: "#8a8578"
-  ghost-edge: "#4d4650"
-  cathode: "#ff6a1a"
-  bronze: "#8a6a3a"
+  paper: "#f5f1ea"
+  paper-2: "#ece6dc"
+  paper-3: "#e2dbce"
+  line: "#d9d1c3"
+  graphite: "#1c1a17"
+  graphite-2: "#5a554f"
+  graphite-3: "#6b655d"
+  amber: "#e2a254"
 typography:
   display:
-    fontFamily: "Barlow Condensed, Arial Narrow, sans-serif"
-    fontSize: "clamp(5rem, 11vw, 12.5rem)"
-    fontWeight: 400
-    lineHeight: 1
-  headline:
-    fontFamily: "Barlow Condensed, Arial Narrow, sans-serif"
-    fontSize: "clamp(2.5rem, 5.2vw, 5rem)"
+    fontFamily: "Hanken Grotesk, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "clamp(2.375rem, 1.1rem + 4.2vw, 4.75rem)"
     fontWeight: 500
-    lineHeight: 1
-    letterSpacing: "0.01em"
-  command:
-    fontFamily: "M PLUS 1 Code, ui-monospace, SF Mono, Menlo, monospace"
-    fontSize: "max(calc(50 * 100vw / 1536), 1.5rem)"
-    fontWeight: 500
-    lineHeight: 1.1
+    lineHeight: 1.02
     letterSpacing: "-0.04em"
+  statement:
+    fontFamily: "Hanken Grotesk, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "clamp(2.25rem, 1.2rem + 3.6vw, 4.25rem)"
+    fontWeight: 500
+    lineHeight: 1.04
+    letterSpacing: "-0.04em"
+  headline:
+    fontFamily: "Hanken Grotesk, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "clamp(2rem, 1.25rem + 2.6vw, 3.5rem)"
+    fontWeight: 500
+    lineHeight: 1.06
+    letterSpacing: "-0.035em"
+  figure:
+    fontFamily: "Hanken Grotesk, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "clamp(2rem, 1.4rem + 1.8vw, 3rem)"
+    fontWeight: 500
+    lineHeight: 1.05
+    letterSpacing: "-0.035em"
+    fontFeature: "\"tnum\" 1"
+  title:
+    fontFamily: "Hanken Grotesk, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "clamp(1.375rem, 1rem + 1.2vw, 2rem)"
+    fontWeight: 500
+    lineHeight: 1.15
+    letterSpacing: "-0.03em"
+  lead:
+    fontFamily: "Hanken Grotesk, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "clamp(1.125rem, 1rem + 0.5vw, 1.375rem)"
+    fontWeight: 400
+    lineHeight: 1.45
+    letterSpacing: "-0.01em"
   body:
-    fontFamily: "M PLUS 1, system-ui, sans-serif"
+    fontFamily: "Hanken Grotesk, ui-sans-serif, system-ui, sans-serif"
     fontSize: "1.0625rem"
     fontWeight: 400
-    lineHeight: 1.6
-    fontFeature: "tnum"
-  label:
-    fontFamily: "M PLUS 1 Code, ui-monospace, SF Mono, Menlo, monospace"
-    fontSize: "0.95rem"
+    lineHeight: 1.5
+  small:
+    fontFamily: "Hanken Grotesk, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "0.875rem"
     fontWeight: 400
-    lineHeight: 1.6
+    lineHeight: 1.45
+  caption:
+    fontFamily: "Hanken Grotesk, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "0.8125rem"
+    fontWeight: 400
+    lineHeight: 1.45
+  terminal:
+    fontFamily: "Geist Mono, ui-monospace, SF Mono, Menlo, monospace"
+    fontSize: "clamp(0.71875rem, 0.55rem + 0.75vw, 0.9375rem)"
+    fontWeight: 400
+    lineHeight: 1.65
+    fontFeature: "\"liga\" 0, \"calt\" 0"
 rounded:
-  focus: "2px"
-  keycap: "4px"
+  highlight: "3px"
+  key: "5px"
+  focus: "6px"
+  button: "8px"
+  panel: "10px"
   pill: "999px"
 spacing:
-  gutter: "calc(66 * 100vw / 1536)"
-  gutter-narrow: "1.25rem"
-  section: "clamp(6rem, 14vw, 12rem)"
-  column-gap: "clamp(2rem, 6vw, 6rem)"
-  heading-gap: "1.5rem"
-  container: "1440px"
+  gutter: "clamp(16px, 4vw, 32px)"
+  column: "1080px"
+  section: "clamp(112px, 13vw, 184px)"
+  terminal-max: "760px"
+  panel-pad: "24px 28px"
+  panel-pad-compact: "18px 16px"
 components:
   button-pill:
-    backgroundColor: "transparent"
-    textColor: "{colors.cathode}"
+    backgroundColor: "{colors.graphite}"
+    textColor: "{colors.paper}"
     rounded: "{rounded.pill}"
-    padding: "0.74em 1.3em"
+    padding: "0 26px"
+    height: "48px"
   button-pill-hover:
-    backgroundColor: "{colors.cathode}"
-    textColor: "{colors.ink}"
+    opacity: 0.88
   button-copy:
-    backgroundColor: "transparent"
-    textColor: "{colors.bone-dim}"
-    rounded: "{rounded.pill}"
-    padding: "0.3em 0.9em"
+    textColor: "{colors.graphite-2}"
+    rounded: "{rounded.button}"
+    size: "34px"
   button-copy-hover:
-    textColor: "{colors.cathode}"
-  button-pill-quiet:
-    backgroundColor: "transparent"
-    textColor: "{colors.bone}"
-    rounded: "{rounded.pill}"
-    padding: "0.5em 1.1em"
-  button-pill-quiet-hover:
-    textColor: "{colors.cathode}"
-  tab-scenario-selected:
-    backgroundColor: "transparent"
-    textColor: "{colors.cathode}"
-    padding: "0.25rem 0"
+    backgroundColor: "{colors.paper-3}"
+    textColor: "{colors.graphite}"
+  link-text:
+    textColor: "{colors.graphite}"
+  terminal-panel:
+    backgroundColor: "{colors.paper-2}"
+    textColor: "{colors.graphite-2}"
+    typography: "{typography.terminal}"
+    rounded: "{rounded.panel}"
+    padding: "{spacing.panel-pad}"
+    width: "{spacing.terminal-max}"
+  terminal-ghost:
+    textColor: "{colors.graphite-3}"
+  terminal-key:
+    backgroundColor: "{colors.paper}"
+    textColor: "{colors.graphite}"
+    rounded: "{rounded.key}"
   keycap:
-    backgroundColor: "transparent"
-    textColor: "{colors.bone}"
-    rounded: "{rounded.keycap}"
-    padding: "0.05em 0.45em"
-  nav-link:
-    textColor: "{colors.bone}"
-  nav-link-hover:
-    textColor: "{colors.cathode}"
+    backgroundColor: "{colors.paper-2}"
+    textColor: "{colors.graphite}"
+    rounded: "{rounded.key}"
+  source-highlight:
+    backgroundColor: "{colors.amber}"
+    textColor: "{colors.graphite}"
+    rounded: "{rounded.highlight}"
+  install-panel:
+    backgroundColor: "{colors.paper-2}"
+    textColor: "{colors.graphite}"
+    typography: "{typography.terminal}"
+    rounded: "{rounded.panel}"
+    padding: "14px 14px 14px 28px"
+    width: "{spacing.terminal-max}"
 ---
 
 # Design System: wisp
 
 ## Overview
 
-**Creative North Star: "Struck Cathode Gauze"**
+**Creative North Star: "The Paper Terminal"**
 
-wisp is drawn as a single dark instrument plane: an ink-blue black field that runs past every edge, with an undulating bronze wire gauze plate behind the first viewport and again behind the measured figures. Type sits on the gauze with no bar, frame or window chrome. The one event in the world is a strike: of all the candidates, one name lights in cathode orange with a tube halo while the rest stay unlit, outlined ghosts. Everything else is bone-white type and space.
+A calm, warm-paper page where the only machine in sight is a light terminal, and the only colour is the moment a suggestion is accepted. The system belongs to the HEYLOLA brand: warm off-white paper, graphite ink, one amber that never carries text. It is light only; there is no dark mode and no dark terminal.
 
-Density is low and the rhythm is long. Sections are separated by large vertical space, not by lines or containers, and each section carries one heading in condensed display type, some prose in M PLUS 1, and whatever real command text it needs in M PLUS 1 Code. Orange is reserved for what wisp picks or what you can act on, so it reads as signal, never decoration.
+Density is low and centred. Every section sits on one 1080px column with a generous vertical rhythm, headings set in Hanken Grotesk at medium weight with tight negative tracking, and long grey copy kept to short measures. The terminal panels are the only boxes on the page; everything else is separated by 1px hairlines or by space. Depth is tonal (paper, paper-2, paper-3), never shadowed.
 
-The world refuses the terminal-window mockup and the feature-card grid: terminal output is set as bare monospace on the plane, and grouping comes from depth (the gauze) and space.
+Motion is the product demonstrated, not decoration. Terminal demos replay real completions as an abortable state machine whose signature is the accept beat: grey ghost text, a keycap press, the line turning solid and an amber block growing behind the source token above. The static HTML always carries the settled frame, so the page is complete without JavaScript.
 
 **Key Characteristics:**
-- One ink plane, full bleed; the bronze gauze plate is the only imagery and the only texture.
-- Two hues: ink blue and cathode orange. Neutrals are warm bone and ash.
-- Lit versus unlit: the chosen value glows in cathode, alternatives stay as hollow ghost outlines in register.
-- Three typefaces with fixed jobs: condensed display, code mono, humanist sans prose.
-- The only control shape is the outlined pill.
+- Light only: warm paper ground, graphite text, no dark surfaces besides the graphite pill.
+- One accent, amber, reserved for caret, focus halo, selection and the source-token highlight. Never text.
+- Hanken Grotesk for everything; Geist Mono only inside terminals, code and install commands.
+- Medium-weight headings with tight tracking; nothing bold.
+- Flat: tonal panels and 1px hairlines, zero shadows.
+- Motion on transform and opacity only, paused off-screen, on hidden tabs and by the user.
 
 ## Colors
 
-A near-black ink field, warm bone type, and one incandescent orange that means "picked" or "press this".
+A warm, low-chroma paper-and-graphite neutral range with a single saturated amber used as a signal, never as a voice.
 
 ### Primary
-- **Cathode Orange** (cathode): the struck completion, lit numerals, step numbers, the selected scenario tab, the completion in the demo prompt, highlighted source names in terminal output, pill outlines and hover states, focus rings and text selection. When it is lit type it carries the tube halo (see Elevation & Depth).
-
-### Secondary
-- **Gauze Bronze** (bronze): the hairline accent of quiet controls: the copy-button outline, keycap borders, and the scrollbar thumb. It is the color of the wire gauze plate, so it reads as part of the material rather than as a second accent.
+- **Accept Amber** (amber): the caret, the 3px focus halo, `::selection`, and the highlight block that grows behind the source token at accept. Graphite sits on it at 7.88:1. It is never a text colour and never a fill for buttons or panels.
 
 ### Neutral
-- **Tube Ink** (ink): the page plane, the pill hover text, the theme color and favicon field.
-- **Deep Ink** (ink-deep): the scrollbar track, the only place the plane goes darker.
-- **Bone** (bone): headings, the wordmark, nav, hero command and subline, inline code, and emphasized words in lists.
-- **Dim Bone** (bone-dim): paragraphs, readout labels and notes, list body text, the unit after a numeral, copy-button text at rest.
-- **Ash** (ash): the quietest legible text: provenance footnotes and the colophon (about 5.3:1 on ink).
-- **Ghost Edge** (ghost-edge): the outline of an unlit numeral sitting behind a lit one, and the `$ ` sigil before copyable commands. It is a stroke and ornament color, not a text color (about 2.2:1 on ink).
+- **Paper** (paper): the page ground, the terminal keycap face inside demos, and the text colour on the graphite pill (15.4:1).
+- **Paper Two** (paper-2): terminal and install panels, inline keycaps. The only raised tone.
+- **Paper Three** (paper-3): hover fill of the copy buttons only.
+- **Line** (line): every 1px hairline: panel borders, keycap borders, footer rule, figures-row and names-row dividers, link underlines at rest, scrollbar thumb.
+- **Graphite** (graphite): headings, body emphasis, links, typed and accepted terminal text, the pill fill, the focus outline.
+- **Graphite Two** (graphite-2): secondary copy (lead, body, nav, footer, figure labels) and terminal output text. 5.94:1 on paper-2, 6.55:1 on paper.
+- **Graphite Three** (graphite-3): ghost suggestions, the `$` prompt sigil, small captions and footnotes. 5.12:1 on paper, 4.64:1 on paper-2.
 
 ### Named Rules
-**The Two Hues Rule.** The page has ink blue and cathode orange, nothing else. Bone, ash and bronze are warm neutrals of the gauze; no third hue enters.
+**The Amber Is A Signal Rule.** Amber marks focus, the caret and the instant of accept. It never sets type, never fills a button, and never appears in the no-JS or reduced-motion frame of a demo.
 
-**The Strike Rule.** Cathode marks the one thing wisp picked or the one thing you can do. If two unrelated things on a screen glow, one of them is wrong.
+**The Solid Ghost Rule.** Ghost text is solid graphite-3, never graphite at reduced opacity. Its contrast is a measured 4.64:1 on paper-2; fading it would break that.
 
 ## Typography
 
-**Display Font:** Barlow Condensed 400/500 (with Arial Narrow, sans-serif)
-**Body Font:** M PLUS 1 (with system-ui, sans-serif)
-**Label/Mono Font:** M PLUS 1 Code (with ui-monospace, SF Mono, Menlo, monospace)
+**Display Font:** Hanken Grotesk, variable 100-900, self-hosted latin + latin-ext, OFL (with ui-sans-serif, system-ui, sans-serif)
+**Body Font:** Hanken Grotesk (same file)
+**Label/Mono Font:** Geist Mono, variable 100-900, self-hosted latin, OFL (with ui-monospace, SF Mono, Menlo, monospace)
 
-**Character:** A tall condensed grotesque for headings and tube numerals against a round, open Japanese-designed sans and its matching code mono. The mono is not a costume: every mono string on the page is a real command, a real completion, or a label on a measurement.
+**Character:** One humanist grotesk carries the whole page at two weights, tight and quiet at size; a clean mono appears only where a real terminal would, with ligatures off so commands read literally.
 
 ### Hierarchy
-- **Display** (Barlow Condensed 400, clamp(5rem, 11vw, 12.5rem), line-height 1; clamp(5rem, 7.2vw, 8.25rem) when the three readouts sit side by side above 1100px): tube numerals in the measured readouts. Step numbers use the same face at 3.25rem (2.5rem on phones) in cathode.
-- **Headline** (Barlow Condensed 500, clamp(2.5rem, 5.2vw, 5rem), line-height 1, 0.01em): one per section, balanced wrap. The hero headline is the same face at a comp-scaled max(47 comp-px, 2.1rem), line-height 1.12; 3.1rem at line-height 1.06 on phones.
-- **Subhead** (Barlow Condensed 500, clamp(1.75rem, 2.6vw, 2.25rem), line-height 1.05): the names in the screen-source index (tmux, WezTerm, kitty, Anything else) and the "Is it working?" check. A qualifier such as "experimental" follows the name in the sans at 0.95rem, bone-dim.
-- **Command** (M PLUS 1 Code 500, max(50 comp-px, 1.5rem), line-height 1.1, -0.04em): the hero command line. The struck completion is 500 at 37 comp-px with 0.015em tracking; ghost candidates are 300 at 36 comp-px. The demo prompt line runs clamp(1.1rem, 2.2vw, 1.9rem). The terminal output above the hero command is 400 at max(19 comp-px, 0.8rem) in ash.
-- **Body** (M PLUS 1 400, 1.0625rem, line-height 1.6, tabular numerals): prose capped at 66ch in bone-dim; lead paragraphs and list items step to 1.125rem.
-- **Label** (M PLUS 1 Code 400, 0.95rem): readout terms and scenario tabs (1rem). Footnotes drop to 0.875rem in the sans; the colophon is mono at 0.9rem.
-
-The wordmark is "wisp", always lowercase, set in M PLUS 1 500 (max(36 comp-px, 1.5rem) in the masthead, 1.4rem in the colophon). There is no drawn logo.
+- **Display** (500, clamp(2.375rem, 1.1rem + 4.2vw, 4.75rem), 1.02, -0.04em): the hero headline, centred, balanced, max 20ch.
+- **Statement** (500, clamp(2.25rem, 1.2rem + 3.6vw, 4.25rem), 1.04, -0.04em): the single privacy statement, revealed line by line.
+- **Headline** (500, clamp(2rem, 1.25rem + 2.6vw, 3.5rem), 1.06, -0.035em): section headings, balanced.
+- **Figure** (500, clamp(2rem, 1.4rem + 1.8vw, 3rem), 1.05, -0.035em, tabular numerals): the three labelled figures.
+- **Title** (500, clamp(1.375rem, 1rem + 1.2vw, 2rem), 1.15, -0.03em): terminal names in the names row.
+- **Lead** (400, clamp(1.125rem, 1rem + 0.5vw, 1.375rem), 1.45, -0.01em): graphite-2 subheads, 34-40ch.
+- **Body** (400, 1.0625rem, 1.5): graphite-2 section copy, max 46ch.
+- **Small** (400, 0.875rem, 1.45): graphite-3 footnotes and name notes, max 62ch.
+- **Caption** (400, 0.8125rem, 1.45): demo disclaimers, the Pause control, "Copied".
+- **Terminal** (Geist Mono 400, clamp(0.71875rem, 0.55rem + 0.75vw, 0.9375rem), 1.65, ligatures off): all terminal and install-command text.
+- **Wordmark** (500, 1.375rem header / 1.0625rem footer, -0.04em): "wisp" set in the body face, not a logo file.
 
 ### Named Rules
-**The Real Strings Rule.** Mono is only for text a terminal would print or a user would type. Prose never goes mono for flavor.
+**The Medium Weight Rule.** Headings are 500 with -0.03em to -0.04em tracking. Nothing on the page is bold.
 
-**The Condensed Heads Rule.** Barlow Condensed carries headings and numerals only, never paragraphs or controls.
+**The Mono Means Machine Rule.** Geist Mono appears only inside terminal panels, `code`/`kbd`, and the install commands. Keycap letters inside prose use the sans at 0.75rem/500.
 
 ## Layout
 
-The hero is measured against a 1536×1024 comp: a comp unit (`--u`, 100vw / 1536; 100vw / 390 at 760px and below) scales the hero's type and positions with the viewport. The hero is max(100svh, 880 comp-px) tall so the install command stays above the fold on 16:10 screens. On desktop the command line sits absolutely at its measured place (16.2% / 36.8%) with three lines of terminal output hanging above it and the candidate stack hanging from the caret; the pitch is anchored to the bottom left (4.5% in, 54 comp-px up): headline, subline, the install command, then one row of controls. A "Pause demo" control sits bottom right. At 760px and below the hero becomes a bottom-aligned column: output, command, stack, pause control, then pitch, gap 2.25rem. Every demo frame reserves the same height there, so typing never moves the page.
+One centred column: 1080px content width plus a fluid gutter of clamp(16px, 4vw, 32px). Sections are separated by clamp(112px, 13vw, 184px) of top padding; the last section also takes it at the bottom. The hero is centred with a reduced top of clamp(40px, 6vw, 88px); its terminal (max 760px) starts clamp(48px, 6vw, 72px) under the actions so it begins above the fold at desktop sizes. Section heads are centred; copy measures stay short (lead 34-40ch, body 46ch).
 
-Below the hero, sections share the plane: `section` top padding, horizontal gutter (never under 1.25rem), max width 1440px, centered. Two-column groups use a 5fr / 7fr split: copy and demo, the screen-source index (name left, description and command right), and how-it-works. The three readouts share a 3fr / 5fr / 4fr row sized to their numerals, the local-first copy sits in three equal columns, and the limits flow in two text columns. Readouts and the local-first copy collapse to one column at 1100px; every grid collapses at 760px. Section headings sit heading-gap above their content. Install steps are a two-column grid (3.5rem numeral column, 2.5rem on phones) with 2.5rem between steps. The colophon closes the page as one wrapped mono row.
-
-**The Space Not Boxes Rule.** Groups are separated by section space and column gap. There are no cards, panels, dividers or horizontal rules.
+Responsive behaviour:
+- **S2 reads, >=960px with motion allowed:** a sticky 100svh stage (5fr copy / 7fr terminals, max 1180px) pinned over a 270svh scroll track; three terminals crossfade in place with three 6px progress dots. Otherwise the three terminals stack in a 760px column, and this is the full no-JS layout.
+- **S3 pair:** two terminals side by side at >=900px, stacked below.
+- **Names row / figures row:** horizontal with hairline dividers; at <=720px names become a 2-column grid and figures a single 360px column with top hairlines.
+- **Terminal and install panels** tighten padding at <=560px; the demo footer stacks.
+- Supported from 360px.
 
 ## Elevation & Depth
 
-The system is flat; depth is optical, not stacked. Two devices carry it. The **gauze plate** (a bronze wire mesh photograph, saturate 0.85) sits behind the hero, masked to fade into ink at every edge, and returns as a band at 0.55 opacity behind the figures so the numerals hang in the same plane as the hero. The **tube halo** is a four-layer zero-offset orange text-shadow that makes lit type read as an incandescent filament. It is the world's native light source, drawn only on text that wisp has struck (the hero completion, lit numerals, the demo completion); highlighted names inside terminal output get a softer single-layer glow. There are no box shadows.
-
-### Shadow Vocabulary
-- **Tube halo** (`text-shadow: 0 0 0.12em rgb(255 106 26 / 0.9), 0 0 0.5em rgb(255 106 26 / 0.75), 0 0 1.2em rgb(255 106 26 / 0.45), 0 0 2.4em rgb(255 106 26 / 0.22)`): struck completions and lit numerals.
-- **Source glint** (`text-shadow: 0 0 0.6em rgb(255 106 26 / 0.45)`): the source name marked inside terminal output.
+Flat. There are no shadows anywhere. Depth is tonal: paper ground, paper-2 for the terminal and install panels and keycaps, paper-3 for the copy-button hover, each bounded by a 1px line hairline. The one `box-shadow` in the build is the focus halo, which is a state ring, not elevation.
 
 ### Named Rules
-**The Filament Rule.** Glow is emitted by lit cathode text and nothing else. No glowing boxes, buttons, borders or backgrounds.
+**The Tone Not Shadow Rule.** A surface rises by one paper step plus a 1px hairline, never by a shadow.
+
+**The Focus Ring Rule.** Every focusable element shows a 2px graphite outline offset 3px with a 3px amber halo (`box-shadow: 0 0 0 3px amber`) and a 6px radius.
 
 ## Shapes
 
-Almost nothing on the page has a silhouette. The only outlined shapes are the fully rounded pill (999px) for controls and the small keycap (4px) for keyboard keys, both drawn as outlines on the ink with no fill at rest. Focus rings are a 2px cathode outline at 4px offset with a 2px corner. Unlit values are drawn as hollow type: a 1–1.5px text stroke with no fill.
+Soft, small radii stepping with object size: 3px on the source highlight block, 5px on keycaps (both in-demo and inline), 8px on the square copy buttons, 10px on terminal and install panels, full pill (999px) on the primary button and skip link. Borders are always 1px line. Dividers in the names row are pseudo-element hairlines inset 8px top and bottom, so they never touch the type; the figures row uses full-height 1px borders. Icons are 16px-grid line SVGs (stroke 1.3-1.5, round caps).
 
 ## Components
 
 ### Buttons
-Outlined, rounded, mono-set; they fill only when you reach for them.
-- **Shape:** fully rounded pill (999px).
-- **Primary pill:** 2px cathode outline, cathode mono 500 text, padding 0.74em 1.3em, optional inline GitHub mark at 1.15em. Used for "Read the source on GitHub" and, at padding 0.5em 1.2em, for "Copy command" under the hero install command, which is the page's primary action.
-- **Quiet pill:** 1px bronze outline, bone mono 500 text, padding 0.5em 1.1em, GitHub mark. The secondary action beside the primary pill. Hover turns text and outline cathode with no fill.
-- **Hover / Focus:** fills cathode with ink text over 160ms ease-out; focus is the global cathode ring.
-- **Copy pill:** 1px bronze outline, bone-dim mono at 0.85rem, padding 0.3em 0.9em, sitting directly after its command. Hover and the copied state turn text and outline cathode over 160ms ease-out. If the clipboard is unavailable the command is selected instead and the pill reads "Selected".
-
-### Links
-- **Text link:** bone text with a 1px bronze underline at 0.25em offset; hover turns both cathode. Used for docs links and links inside prose. Colophon links stay ash mono and turn cathode on hover.
-
-### Tabs
-- **Scenario tabs:** bare mono words in a wrapping row (gap 0.25rem 1.5rem), no underline or box. The selected tab is cathode; hover lifts an idle tab to bone-dim.
+Quiet and certain: one dark pill per action group, everything else is a text link.
+- **Shape:** full pill (999px), 48px minimum height.
+- **Primary (pill):** graphite fill, paper text, 500 weight, 1rem, -0.005em, 0 26px padding.
+- **Hover / Focus / Active:** hover eases to 0.88 opacity on fine pointers only; active scales to 0.97 over 160ms on the accept ease; focus is the shared ring.
+- **Text link:** graphite text with a 1px line-coloured underline at 0.25em offset; the underline turns graphite on hover (150ms).
+- **Copy button:** 34px square, 8px radius, transparent, 16px line icon in graphite-2; hover fills paper-3 and darkens the icon; active scales 0.94; on copy a "Copied" caption fades in to its left over the ghost timing and the icon drops to 0.35 opacity for 1.6s. Hidden until JS is present.
+- **Pause / Play toggle:** a caption-sized underlined text button in graphite-2 under the hero demo.
 
 ### Navigation
-- **Masthead:** no bar. Lowercase wordmark top left; Install, Docs and GitHub top right, all bone M PLUS 1 500, sitting directly on the gauze. Links turn cathode on hover.
+Header: 72px bar on the content column, wordmark left, three graphite-2 links at 0.9375rem right, darkening to graphite on hover. Footer: a 1px top hairline, wordmark, plain links, "MIT", and the HEYLOLA mark at 15px (13px on small screens).
 
-### Keycaps
-- **Style:** 1px bronze outline, 4px corners, bone mono at 0.85em, padding 0.05em 0.45em, inline in prose for →, End, Ctrl and F.
+### Terminal Panel (signature)
+A light terminal, not a dark one.
+- **Container:** paper-2, 1px line border, 10px radius, 24px 28px padding (18px 16px under 560px), terminal type in graphite-2, max 760px.
+- **Lines:** output in graphite-2; commands the user ran and the live prompt in graphite; the `$` sigil in graphite-3.
+- **Prompt:** two stacked layers in one grid cell, a live layer (typed text, amber 2px caret, graphite-3 ghost) and a done layer (the accepted command, solid graphite), with an in-terminal keycap (paper face, 1px line, 5px radius, arrow icon) on the right.
+- **Source token:** the name on screen that the suggestion completes; at accept it turns graphite and a 3px-radius amber block scales from 0 to 1 on X behind it, left origin.
+- **Scenes:** multi-scene demos stack scenes in one cell and crossfade at 400ms on the settle ease.
+- **Static frame:** the HTML ships ghost + keycap visible and no amber. This is what no-JS and reduced-motion visitors see.
 
-### Command Row
-- **Style:** a bone mono command preceded by a ghost-edge `$ ` sigil, wrapping anywhere, with a copy pill right after it on its baseline (stacked under it on phones). No surrounding box. In the hero the command is 500 weight and its controls sit on the row below.
+### The Accept Beat (signature motion)
+Typing at 55 +/- 20ms per character; the ghost appears 140ms after the last key (60ms debounce plus ~80ms cached latency) over 180ms on cubic-bezier(0.2, 0, 0, 1); the keycap fades in, presses to scale 0.94 for 80ms, then the done layer fades over the live one in 320ms on cubic-bezier(0.32, 0.72, 0, 1) while the amber block grows behind the source token; the keycap fades out after 240ms and the caret resumes blinking 400ms later. Output lines settle in at 640ms on cubic-bezier(0.16, 1, 0.3, 1), translateY(6px) to 0, staggered 40ms per line. Demos run as an abortable timeline per panel: they pause off-screen, on a hidden tab and via the Pause control, and any interrupt jumps to the accepted end frame. The only other entrance on the page is the statement's line-by-line reveal (translateY(105%) to 0, 640ms settle, 80ms between lines).
 
-### Source Index
-The screen sources as a typographic index: the name as a Subhead in the left column, one or two sentences and the real command wisp runs in the right. Rows are separated by 2.75rem of space, never by rules.
+### Keycaps (inline)
+Inline `kbd` in prose: paper-2 face, 1px line border, 5px radius, min 2em wide, 0.5em 0.6em padding; arrow as a 0.75rem line icon, letters as sans 0.75rem/500; a graphite-3 "+" between chord keys.
 
-### Ledger
-Every measured figure by model as a bare table: mono 0.95rem, row labels bone-dim, values bone, column heads bone 500, no borders or fills, max width 48rem. Nothing in it is lit; the tube readouts above it carry the strike.
+### Install Panel
+The terminal container in its static form: paper-2, 1px line, 10px radius, max 760px. Each command is a Geist Mono line in graphite with a graphite-3 `$ ` prefix and hanging indent so wrapped commands align, paired with a copy button. The final check command sits below a 1px hairline. A graphite pill below copies all commands; text links sit beside it.
 
-### Candidate Stack (signature)
-The hero's command line with its candidates hanging from the caret: a 2px bone caret, unlit candidates as hollow mono (fill #10162a, 1px stroke #3a4a64, weight 300), then the struck completion in cathode with the tube halo. Three lines of terminal output sit above the command in ash, so the name is on screen before wisp strikes it. The demo plays each real completion as a sequence: the output arrives, the command is typed at 55ms a key, and after a 420ms beat the completion strikes while the same name lights in the output above. The struck value snaps in, never tweens; the previous value decays over one beat (700ms, cubic-bezier(0.16, 1, 0.3, 1), opacity 0.55 to 0 with a 3px blur). Each strike holds 3s; the first frame holds 4.2s. The loop stops while the hero is off screen or the tab is hidden, and a "Pause demo" control (bare ash mono, like a scenario tab) stops it on request. Reduced motion and no-JS show the finished first example and nothing moves.
+### Names Row
+Terminal names at title size with a small graphite-3 note under each (inline `code` in graphite-2), separated by inset 1px hairline pseudo-elements; wraps to a 2-column grid at <=720px.
 
-### Tube Readout (signature)
-A measured value as a tube numeral: the lit value in cathode display type with the halo, the unit or denominator at 0.42em in bone-dim, and when a before-value exists, the unlit numeral sits in register behind it as a ghost-edge outline (1.5px stroke, no fill). A mono label above and a bone-dim note (max 44ch) below.
+### Figures Row
+Three labelled figures on a 1px top hairline, max 880px, separated by 1px vertical hairlines; the figure (tabular numerals) sits above a graphite-2 label at 0.9375rem; a small graphite-3 footnote states the source. Collapses to one 360px column with per-figure top hairlines.
 
 ## Do's and Don'ts
 
 ### Do:
-- **Do** keep the page on one ink plane (#0a0a18) running to every edge, with the gauze plate masked into it.
-- **Do** reserve cathode for the struck value and for controls, and give struck text the four-layer tube halo.
-- **Do** show alternatives as hollow ghost outlines in register behind or beside the lit value.
-- **Do** set every command, completion and terminal line in M PLUS 1 Code, and only those.
-- **Do** make controls outlined pills: cathode 2px for the primary action, bronze 1px for quiet ones.
-- **Do** separate sections with the section space (clamp(6rem, 14vw, 12rem)) and let prose wrap at 66ch.
-- **Do** strike, don't tween: value changes snap, and only the outgoing glow decays over one beat.
+- **Do** keep the page light: paper ground, paper-2 panels, graphite text.
+- **Do** separate with 1px line hairlines or space; the terminal and install panels are the only boxes.
+- **Do** set headings in Hanken Grotesk 500 with -0.03em to -0.04em tracking.
+- **Do** ship every demo's settled frame in HTML (ghost + keycap, no amber) so the page works without JS and under reduced motion.
+- **Do** animate only transform and opacity, using the settle (640ms), ghost (180ms) and accept (320ms) tokens, and stop all demos off-screen, on hidden tabs and on Pause.
+- **Do** use the shared focus ring: 2px graphite outline, 3px offset, 3px amber halo.
 
 ### Don't:
-- **Don't** draw terminal windows, title bars, traffic-light dots or code panels; terminal text sits bare on the plane.
-- **Don't** group content in cards, bordered panels, dividers or horizontal rules.
-- **Don't** put glow or shadow on boxes, buttons or borders; the halo belongs to lit cathode text only.
-- **Don't** introduce a third hue, a gradient fill, or a second accent beside cathode.
-- **Don't** set prose or controls in Barlow Condensed, or prose in mono.
-- **Don't** use ghost-edge (#4d4650) for readable text; it is for outlines and the `$ ` sigil.
-- **Don't** capitalize the wordmark; it is always "wisp".
+- **Don't** add a dark mode or a dark terminal.
+- **Don't** use shadows for depth; the focus halo is the only box-shadow.
+- **Don't** set any text in amber or fill buttons or panels with it.
+- **Don't** fade ghost text with opacity; it is solid graphite-3.
+- **Don't** put eyebrows or kicker labels above section headings.
+- **Don't** use Geist Mono outside terminal panels, inline code and the install commands.
+- **Don't** use bold weights; 500 is the heaviest.

@@ -1,259 +1,299 @@
-// Scenarios from wisp's eval. `completion` is what Qwen2.5-Coder produced; `output` is the
-// fixture the model saw above the prompt, with `source` marking where the name came from.
-// `seen` is the same fixture cut down to the lines and columns that fit above the hero prompt.
-const SCENARIOS = {
-  kubectl: {
-    output: [
-      "$ kubectl get pods -n billing",
-      "NAME                        READY   STATUS             RESTARTS",
-      "api-7d9f8b6c4-x2kqp         0/1     CrashLoopBackOff   12",
-      "worker-5c8d7f9b6-mn4lz      1/1     Running            0",
-    ],
-    seen: [
-      "$ kubectl get pods -n billing",
-      "api-7d9f8b6c4-x2kqp      0/1  CrashLoopBackOff",
-      "worker-5c8d7f9b6-mn4lz   1/1  Running",
-    ],
-    source: "api-7d9f8b6c4-x2kqp",
-    typed: "kubectl logs -n billing api",
-    completion: "-7d9f8b6c4-x2kqp",
-    ghosts: ["-worker-5c8d", "-gateway", "-api-v2"],
-  },
-  compose: {
-    output: ["$ ls", "README.md  docker-compose.prod.yml  docker-compose.yml  src/  scripts/"],
-    seen: ["$ ls", "README.md  docker-compose.prod.yml", "docker-compose.yml  scripts/  src/"],
-    source: "docker-compose.prod.yml",
-    typed: "docker compose -f docker-compose.p",
-    completion: "rod.yml up -d",
-    ghosts: ["docker-compose.yml", "README.md", "scripts/"],
-  },
-  git: {
-    output: [
-      "$ git branch -a",
-      "  main",
-      "* develop",
-      "  feat/payments-refactor",
-      "  remotes/origin/feat/payments-refactor",
-    ],
-    seen: ["$ git branch -a", "* develop", "  feat/payments-refactor"],
-    source: "feat/payments-refactor",
-    typed: "git checkout feat/p",
-    completion: "ayments-refactor",
-    ghosts: ["main", "develop", "origin/feat/payments-refactor"],
-  },
-  trace: {
-    output: [
-      "$ python -m app",
-      "Traceback (most recent call last):",
-      '  File "/srv/app/src/billing/invoice_service.py", line 142, in total',
-      "    return sum(l.amount for l in lines)",
-      "TypeError: unsupported operand type(s)",
-    ],
-    seen: [
-      "$ python -m app",
-      'File "/srv/app/src/billing/invoice_service.py"',
-      "TypeError: unsupported operand type(s)",
-    ],
-    source: "src/billing/invoice_service.py",
-    typed: "nvim src/b",
-    completion: "illing/invoice_service.py",
-    ghosts: ["src/", "scripts/", "README.md"],
-  },
-  lsof: {
-    output: [
-      "$ lsof -i :3000",
-      "COMMAND   PID USER   FD   TYPE DEVICE SIZE/OFF NODE NAME",
-      "node    48213 dev    23u  IPv6 0x1a2b      0t0  TCP *:hbci (LISTEN)",
-    ],
-    seen: ["$ lsof -i :3000", "COMMAND   PID USER   NAME", "node    48213 dev    TCP *:hbci (LISTEN)"],
-    source: "48213",
-    typed: "kill ",
-    completion: "48213",
-    ghosts: ["node", "3000", "-9"],
-  },
-  docker: {
-    output: [
-      "$ docker ps",
-      "CONTAINER ID   IMAGE         NAMES",
-      "3f2a9c1b7e4d   postgres:16   pgl-db-1",
-      "9b8e7d6c5a4f   redis:7       pgl-cache-1",
-    ],
-    seen: ["$ docker ps", "postgres:16   pgl-db-1", "redis:7       pgl-cache-1"],
-    source: "pgl-db-1",
-    typed: "docker exec -it pgl-d",
-    completion: "b-1 bash",
-    ghosts: ["pgl-cache-1", "postgres:16", "redis:7"],
-  },
-};
+// wisp landing v2: demo state machine, reveals and copy buttons.
+// The HTML carries every demo's settled frame, so the page is complete without this file.
+(() => {
+  "use strict";
 
-const ORDER = Object.keys(SCENARIOS);
-// First paint (and any no-JS or headless capture) is the finished first example.
-const FIRST_HOLD_MS = 4200;
-const HOLD_MS = 3000;
-const KEY_MS = 55;
-// The real debounce is 60 ms; the demo waits a readable beat before the strike.
-const STRIKE_DELAY_MS = 420;
-const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-document.documentElement.classList.add("js");
-
-function escapeHtml(text) {
-  return text.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
-}
-
-// Marks the first occurrence of the name, where wisp found it.
-function markSource(lines, source) {
-  const name = escapeHtml(source);
-  let marked = false;
-  return lines
-    .map(escapeHtml)
-    .map((line) => {
-      if (marked || !line.includes(name)) return line;
-      marked = true;
-      return line.replace(name, `<mark>${name}</mark>`);
-    })
-    .join("\n");
-}
-
-function setupHeroDemo() {
-  const tube = document.querySelector("[data-cycle]");
-  if (!tube) return;
-  const toggle = tube.querySelector("[data-demo-toggle]");
-  if (reducedMotion) {
-    toggle.hidden = true;
-    return;
-  }
-  const seen = tube.querySelector("[data-seen]");
-  const typed = tube.querySelector("[data-typed]");
-  const stack = tube.querySelector("[data-stack]");
-  const ghosts = tube.querySelector("[data-ghosts]");
-  const struck = tube.querySelector("[data-struck]");
-  const afterglow = tube.querySelector("[data-afterglow]");
-  const hero = tube.closest(".hero");
-  let userPaused = false;
-  let visible = true;
-
-  const running = () => !userPaused && visible && !document.hidden;
-  const sleep = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms));
-  // Waits `ms` of running time; a pause holds the demo on the current frame.
-  const beat = async (ms) => {
-    await sleep(ms);
-    while (!running()) await sleep(200);
-  };
-
-  const play = async (name) => {
-    const scenario = SCENARIOS[name];
-    // The outgoing completion decays while the next screen arrives.
-    afterglow.textContent = struck.textContent;
-    afterglow.classList.remove("decaying");
-    void afterglow.offsetWidth;
-    afterglow.classList.add("decaying");
-    stack.classList.add("unstruck");
-    seen.innerHTML = markSource(scenario.seen, scenario.source);
-    typed.textContent = "";
-    ghosts.innerHTML = scenario.ghosts.map((g) => `<li>${escapeHtml(g)}</li>`).join("");
-    struck.textContent = scenario.completion;
-    await beat(700);
-    for (let i = 1; i <= scenario.typed.length; i += 1) {
-      typed.textContent = scenario.typed.slice(0, i);
-      await beat(KEY_MS);
-    }
-    await beat(STRIKE_DELAY_MS);
-    // Strike: the completion snaps in and the name on screen lights with it.
-    stack.classList.remove("unstruck");
-    seen.querySelector("mark")?.classList.add("lit");
-  };
-
-  const loop = async () => {
-    await beat(FIRST_HOLD_MS);
-    for (let index = 1; ; index = (index + 1) % ORDER.length) {
-      await play(ORDER[index]);
-      await beat(HOLD_MS);
-    }
-  };
-
-  toggle.addEventListener("click", () => {
-    userPaused = !userPaused;
-    toggle.setAttribute("aria-pressed", String(userPaused));
-    toggle.textContent = userPaused ? "Play demo" : "Pause demo";
-  });
-  if ("IntersectionObserver" in window) {
-    new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; }, { threshold: 0.2 }).observe(hero);
-  }
-  loop();
-}
-
-function setupScreen() {
-  const screen = document.querySelector("[data-screen]");
-  if (!screen) return;
-  const tabs = [...screen.querySelectorAll("[data-scenario]")];
-  const panel = screen.querySelector("[data-panel]");
-  const output = screen.querySelector("[data-output]");
-  const typed = screen.querySelector("[data-prompt-typed]");
-  const completion = screen.querySelector("[data-prompt-completion]");
-
-  const show = (name) => {
-    const scenario = SCENARIOS[name];
-    output.innerHTML = markSource(scenario.output, scenario.source);
-    typed.textContent = scenario.typed;
-    completion.textContent = scenario.completion;
-    for (const tab of tabs) {
-      const selected = tab.dataset.scenario === name;
-      tab.setAttribute("aria-selected", String(selected));
-      tab.tabIndex = selected ? 0 : -1;
-      if (selected) panel.setAttribute("aria-labelledby", tab.id);
-    }
-  };
-
-  tabs.forEach((tab, i) => {
-    tab.addEventListener("click", () => show(tab.dataset.scenario));
-    tab.addEventListener("keydown", (event) => {
-      const target = {
-        ArrowRight: (i + 1) % tabs.length,
-        ArrowLeft: (i - 1 + tabs.length) % tabs.length,
-        Home: 0,
-        End: tabs.length - 1,
-      }[event.key];
-      if (target === undefined) return;
-      event.preventDefault();
-      tabs[target].focus();
-      show(tabs[target].dataset.scenario);
-    });
-  });
-}
-
-function setupCopy() {
+  const root = document.documentElement;
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)");
   const status = document.querySelector("[data-status]");
-  for (const button of document.querySelectorAll("[data-copy]")) {
-    const label = button.textContent;
-    const code = button.closest(".cmd").querySelector("code");
-    let reset;
-    button.addEventListener("click", async () => {
-      let message = "Copied";
-      try {
-        await navigator.clipboard.writeText(code.textContent);
-      } catch {
-        // No clipboard access: select the command so one keystroke copies it.
-        const range = document.createRange();
-        range.selectNodeContents(code);
-        const selection = window.getSelection();
-        selection.removeAllRanges();
-        selection.addRange(range);
-        message = "Selected";
-      }
-      button.textContent = message;
-      button.classList.add("copied");
-      if (status) status.textContent = `${message}: ${code.textContent}`;
-      window.clearTimeout(reset);
-      reset = window.setTimeout(() => {
-        button.textContent = label;
-        button.classList.remove("copied");
-        if (status) status.textContent = "";
-      }, 1600);
+  const motion = !reduce.matches && "IntersectionObserver" in window;
+
+  const announce = (msg) => {
+    status.textContent = "";
+    requestAnimationFrame(() => { status.textContent = msg; });
+  };
+
+  // ---------- copy buttons (independent of motion) ----------
+
+  const copyText = async (text) => {
+    try { await navigator.clipboard.writeText(text); return true; }
+    catch { return false; }
+  };
+  const flash = (btn) => {
+    btn.classList.add("is-copied");
+    clearTimeout(btn._t);
+    btn._t = setTimeout(() => btn.classList.remove("is-copied"), 1600);
+  };
+  const rows = [...document.querySelectorAll(".cmds code")].map((c) => c.textContent);
+
+  document.querySelectorAll("[data-copy]").forEach((btn) => {
+    btn.hidden = false;
+    btn.addEventListener("click", async () => {
+      const ok = await copyText(btn.parentElement.querySelector("code").textContent);
+      if (ok) { flash(btn); announce("Copied to clipboard."); }
+      else announce("Copy failed. Select the command and copy it by hand.");
+    });
+  });
+  const all = document.querySelector("[data-copy-all]");
+  if (all) {
+    all.hidden = false;
+    all.addEventListener("click", async () => {
+      const ok = await copyText(rows.slice(0, 4).join("\n") + "\n");
+      if (ok) {
+        all.textContent = "Copied all four";
+        clearTimeout(all._t);
+        all._t = setTimeout(() => { all.textContent = "Copy all four commands"; }, 1800);
+        announce("Copied all four install commands to clipboard.");
+      } else announce("Copy failed. Select the commands and copy them by hand.");
     });
   }
-}
 
-setupHeroDemo();
-setupScreen();
-setupCopy();
+  if (!motion) return;
+  root.classList.add("motion");
+
+  // ---------- timing helpers ----------
+
+  const wait = (ms, signal) => new Promise((resolve, reject) => {
+    if (signal.aborted) return reject(signal.reason);
+    const t = setTimeout(resolve, ms);
+    signal.addEventListener("abort", () => { clearTimeout(t); reject(signal.reason); }, { once: true });
+  });
+  const jitter = () => 55 + Math.round((Math.random() * 2 - 1) * 20);
+
+  // ---------- Scene: one terminal frame ----------
+  // phases: empty -> out -> typing -> ghost -> key -> accept (settled)
+
+  class Scene {
+    constructor(el) {
+      this.el = el;
+      this.typed = el.querySelector(".typed");
+      this.text = this.typed.textContent;
+      this.hasSrc = !!el.querySelector(".src");
+      this.accepted = false;
+      el.querySelectorAll(".ln").forEach((ln, i) => ln.style.setProperty("--i", i));
+    }
+    set(cls, on = true) { this.el.classList.toggle(cls, on); }
+
+    // Jump to the starting frame with no transitions. Output stays when keepOut is set.
+    clear(keepOut = false) {
+      const el = this.el;
+      el.classList.add("no-tx");
+      el.classList.toggle("has-out", keepOut);
+      el.classList.remove("has-ghost", "has-key", "has-accept", "has-lit", "is-typing", "is-press");
+      this.typed.textContent = "";
+      this.accepted = false;
+      void el.offsetWidth;
+      el.classList.remove("no-tx");
+    }
+
+    // Settle to the end frame (accepted line, source lit), with transitions. Interrupt target.
+    settle() {
+      this.set("is-typing", false);
+      this.set("is-press", false);
+      this.typed.textContent = this.text;
+      ["has-out", "has-ghost", "has-key", "has-accept"].forEach((c) => this.set(c));
+      this.set("has-lit", this.hasSrc);
+      this.accepted = true;
+    }
+
+    async play(signal, pace = 1, keepOut = false) {
+      const lines = this.el.querySelectorAll(".ln").length;
+      this.clear(keepOut);
+      await wait(40, signal);
+      if (!keepOut) {
+        this.set("has-out");
+        await wait((lines * 40 + 520) * pace, signal);
+      } else await wait(360 * pace, signal);
+
+      if (this.text) {
+        this.set("is-typing");
+        for (let i = 1; i <= this.text.length; i++) {
+          this.typed.textContent = this.text.slice(0, i);
+          await wait(jitter(), signal);
+        }
+        this.set("is-typing", false);
+        await wait(140, signal); // 60 ms pause + ~80 ms cached model latency
+      } else {
+        await wait(900 * pace, signal); // empty prompt: the caret idles, then the prediction lands
+      }
+
+      this.set("has-ghost");
+      await wait(720 * pace, signal);
+      this.set("has-key");
+      await wait(420 * pace, signal);
+      this.set("is-press");
+      await wait(90, signal);
+      this.set("is-press", false);
+      this.accepted = true;
+      this.set("has-accept");
+      if (this.hasSrc) this.set("has-lit");
+    }
+  }
+
+  // ---------- Runner: one abortable timeline per demo ----------
+
+  let paused = false;
+  const runners = [];
+
+  class Runner {
+    constructor(script) { this.script = script; this.ctl = null; this.wanted = false; }
+    get running() { return !!this.ctl; }
+    want(on) { this.wanted = on; this.sync(); }
+    sync() {
+      const go = this.wanted && !paused && !document.hidden;
+      if (go && !this.ctl) this.start();
+      else if (!go && this.ctl) this.stop();
+      else if (paused && !this.ctl) this.script.interrupt(); // paused before it ever played: show the settled frame
+    }
+    async start() {
+      const ctl = (this.ctl = new AbortController());
+      try { await this.script.run(ctl.signal); }
+      catch (e) { if (!ctl.signal.aborted) throw e; }
+      if (this.ctl === ctl) this.ctl = null;
+    }
+    stop() {
+      const ctl = this.ctl;
+      this.ctl = null;
+      ctl.abort();
+      this.script.interrupt();
+    }
+  }
+  const runner = (script) => { const r = new Runner(script); runners.push(r); return r; };
+
+  // Hero: loops through its scenes forever (while in view and not paused).
+  const loopEl = document.querySelector("[data-loop]");
+  if (loopEl) {
+    const scenes = [...loopEl.querySelectorAll("[data-scene]")].map((el) => new Scene(el));
+    let idx = 0;
+    const show = (i) => scenes.forEach((s, j) => s.set("is-off", j !== i));
+    // first paint: start from an empty terminal, not from the settled frame
+    scenes.forEach((s) => s.clear());
+    show(0);
+    let fresh = true;
+
+    const hero = runner({
+      async run(signal) {
+        for (;;) {
+          const s = scenes[idx];
+          if (!fresh) { // fade the settled frame away before replaying
+            s.set("is-off");
+            await wait(420, signal);
+          }
+          fresh = false;
+          s.clear();
+          show(idx);
+          await s.play(signal);
+          await wait(1800, signal);
+          s.set("is-off");
+          await wait(420, signal);
+          idx = (idx + 1) % scenes.length;
+          s.clear();
+          fresh = true;
+        }
+      },
+      interrupt() {
+        const s = scenes[idx];
+        show(idx);
+        s.settle();
+        fresh = false;
+      },
+    });
+
+    new IntersectionObserver(([e]) => {
+      if (e.intersectionRatio >= 0.5) hero.want(true);
+      else if (!e.isIntersecting) hero.want(false);
+    }, { threshold: [0, 0.5] }).observe(loopEl);
+  }
+
+  // One-shot scene: plays once when shown, then stays settled.
+  // Its output is already on screen, so a waiting panel is never an empty box.
+  const oneShot = (el, pace = 1) => {
+    const s = new Scene(el);
+    s.clear(true);
+    let done = false;
+    return runner({
+      async run(signal) {
+        if (done) return;
+        await s.play(signal, pace, true);
+        done = true;
+      },
+      interrupt() { s.settle(); done = true; },
+    });
+  };
+
+  // S2: sticky stage on desktop, stacked one-shots otherwise.
+  const reads = document.querySelector("[data-reads]");
+  if (reads) {
+    const shots = [...reads.querySelectorAll(".shot")];
+    const shotRunners = shots.map((f) => oneShot(f.querySelector("[data-scene]"), 0.7));
+    const pinned = matchMedia("(min-width: 960px)");
+    let active = 0, inStage = false;
+
+    const apply = () => {
+      shotRunners.forEach((r, i) => r.want(pinned.matches ? inStage && i === active : r._visible));
+    };
+    const setActive = (i) => {
+      if (i === active && reads.dataset.active) return;
+      active = i;
+      reads.dataset.active = String(i);
+      apply();
+    };
+    reads.dataset.active = "0";
+
+    const centre = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) setActive(+e.target.dataset.marker); });
+    }, { rootMargin: "-50% 0px -50% 0px" });
+    reads.querySelectorAll("[data-marker]").forEach((m) => centre.observe(m));
+
+    new IntersectionObserver(([e]) => { inStage = e.isIntersecting; apply(); }, { threshold: 0.25 })
+      .observe(reads.querySelector(".reads-shots"));
+
+    const each = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        const r = shotRunners[shots.indexOf(e.target)];
+        if (e.intersectionRatio >= 0.35) r._visible = true;
+        else if (!e.isIntersecting) r._visible = false;
+      });
+      apply();
+    }, { threshold: [0, 0.35] });
+    shots.forEach((f) => each.observe(f));
+    pinned.addEventListener("change", apply);
+  }
+
+  // S3: each compact demo plays once when it is well in view.
+  document.querySelectorAll("[data-once]").forEach((fig) => {
+    const r = oneShot(fig.querySelector("[data-scene]"));
+    new IntersectionObserver(([e]) => {
+      if (e.intersectionRatio >= 0.35) r.want(true);
+      else if (!e.isIntersecting) r.want(false);
+    }, { threshold: [0, 0.35] }).observe(fig);
+  });
+
+  // ---------- Pause / Play and hidden tabs ----------
+
+  const toggle = document.querySelector("[data-toggle]");
+  if (toggle) {
+    toggle.hidden = false;
+    toggle.addEventListener("click", () => {
+      paused = !paused;
+      root.classList.toggle("is-paused", paused);
+      toggle.setAttribute("aria-pressed", String(paused));
+      toggle.textContent = paused ? "Play demos" : "Pause demos";
+      runners.forEach((r) => r.sync());
+    });
+  }
+  document.addEventListener("visibilitychange", () => runners.forEach((r) => r.sync()));
+
+  // ---------- S5 statement: line-by-line reveal, once ----------
+
+  const lines = document.querySelector("[data-lines]");
+  if (lines) {
+    new IntersectionObserver(([e], io) => {
+      if (!e.isIntersecting) return;
+      lines.classList.add("is-in");
+      io.disconnect();
+    }, { threshold: 0.2 }).observe(lines);
+  }
+
+  reduce.addEventListener("change", () => { if (reduce.matches) location.reload(); });
+})();

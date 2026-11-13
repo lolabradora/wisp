@@ -3,19 +3,28 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'">
   <title>wisp: nothing at this path</title>
   <meta name="robots" content="noindex">
-  <meta name="theme-color" content="#0a0a18">
-  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#f5f1ea">
+  <meta name="color-scheme" content="light">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
+  <header class="top">
+    <a class="wordmark" href="https://lolabradora.github.io/wisp/">wisp</a>
+  </header>
   <main class="lost">
-    <pre class="lost-screen">$ cat this-page
-cat: this-page: No such file or directory</pre>
-    <h1>That name is not on the screen.</h1>
-    <p>There is nothing at this address. The page you want is probably the front one.</p>
+    <div class="term" aria-hidden="true">
+      <div class="scene has-out has-ghost">
+        <div class="ln c"><span class="ps">$</span> cat this-page</div>
+        <div class="ln">cat: this-page: No such file or directory</div>
+        <div class="ln prompt"><span class="cmd"><span class="live"><span class="ps">$</span> <i class="caret"></i><span class="ghost">cd ~</span></span></span></div>
+      </div>
+    </div>
+    <h1 class="h2">That name is not on the screen.</h1>
+    <p class="body">There is nothing at this address. The page you want is probably the front one.</p>
     <p><a class="pill" href="https://lolabradora.github.io/wisp/">Back to wisp</a></p>
   </main>
 </body>
