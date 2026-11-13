@@ -206,7 +206,7 @@
         <p class="body">It takes the name from your screen and the flags from what you ran before.</p>
       </header>
       <figure class="demo long-demo">
-        <div class="term" data-loop role="img" aria-label="Demo: an earlier aws logs tail command for billing-webhook is on screen, followed by a list of log groups that includes billing-invoice-sync. Typing aws logs tail /aws/lambda/billing-i, wisp suggests the rest: billing-invoice-sync with the same --since 30m --follow --format short --profile prod flags as the earlier command.">
+        <div class="term" data-loop role="img" aria-label="Demo: an earlier aws logs tail command for billing-webhook is on screen, followed by a list of log groups that includes billing-invoice-sync. Typing aws logs tail /aws/lambda/billing-i, wisp suggests the rest: billing-invoice-sync with the same --since 30m --follow --format short --profile prod flags as the earlier command. Then, after an earlier ffmpeg encode and an ffprobe of launch-demo.mov, typing ffmpeg -i la, wisp suggests the same encode for launch-demo.mov, writing launch-demo.mp4.">
           <div class="scene has-out has-ghost has-key" data-scene data-latency="224" aria-hidden="true">
             <div class="ln c"><span class="ps">$</span> aws logs tail /aws/lambda/billing-webhook <span class="src alt">--since 30m --follow --format short --profile prod</span></div>
             <div class="ln">2026-11-13T09:41:07 START RequestId: 7f3c2e1a Version: $LATEST</div>
@@ -220,11 +220,24 @@
               <kbd class="key"><svg viewBox="0 0 16 16"><path d="M3 8h9.5M8.5 4l4 4-4 4"/></svg></kbd>
             </div>
           </div>
+          <div class="scene is-off" data-scene data-latency="775" aria-hidden="true">
+            <div class="ln c"><span class="ps">$</span> ffmpeg -i intro.mov <span class="src alt">-vf scale=1920:-2 -c:v libx264 -crf 20 -preset slow -c:a aac -b:a 192k</span> intro.mp4</div>
+            <div class="ln">frame= 3214 fps= 61 q=-1.0 Lsize=   41872kB time=00:01:47.21 speed=2.03x</div>
+            <div class="ln c"><span class="ps">$</span> ffprobe -hide_banner <span class="src">launch-demo.mov</span></div>
+            <div class="ln">  Stream #0:0: Video: prores (HQ), yuv422p10le, 3840x2160, 29.97 fps</div>
+            <div class="ln prompt">
+              <span class="cmd">
+                <span class="live"><span class="ps">$</span> <span class="typed">ffmpeg -i la</span><i class="caret"></i><span class="ghost">unch-demo.mov -vf scale=1920:-2 -c:v libx264 -crf 20 -preset slow -c:a aac -b:a 192k launch-demo.mp4</span></span>
+                <span class="done"><span class="ps">$</span> ffmpeg -i launch-demo.mov -vf scale=1920:-2 -c:v libx264 -crf 20 -preset slow -c:a aac -b:a 192k launch-demo.mp4<i class="caret"></i></span>
+              </span>
+              <kbd class="key"><svg viewBox="0 0 16 16"><path d="M3 8h9.5M8.5 4l4 4-4 4"/></svg></kbd>
+            </div>
+          </div>
         </div>
         <figcaption class="legend">
           <span><i class="sw"></i>Name from the screen</span>
           <span><i class="sw alt"></i>Flags from an earlier command</span>
-          <span class="legend-note">Recorded with Qwen2.5-Coder 1.5B on an Apple M4 Pro: 224&nbsp;ms.</span>
+          <span class="legend-note">Recorded on an Apple M4 Pro: aws with Qwen2.5-Coder 1.5B in 224&nbsp;ms, ffmpeg with 3B in 775&nbsp;ms.</span>
         </figcaption>
       </figure>
     </section>
