@@ -3,45 +3,27 @@
 <head>
 <meta charset="utf-8">
 <title>wisp og:image source (1200x630)</title>
-<!-- Source for site/assets/og.png. Render at 1200x630 with a headless browser; see site/assets/og.png.json. -->
+<!-- Source for site/assets/og.png. Render at 1200x630 with headless Chrome; see site/assets/og.png.json. -->
 <link rel="stylesheet" href="../../site/assets/style.css">
 <style>
   html, body { width: 1200px; height: 630px; overflow: hidden; }
-  body { position: relative; isolation: isolate; }
-  .plate { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; filter: saturate(0.85);
-    mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent), linear-gradient(to bottom, transparent, #000 5%, #000 94%, transparent); mask-composite: intersect; }
-  .mark { position: absolute; left: 64px; top: 48px; font: 500 40px/1 var(--sans); color: var(--bone); }
-  .where { position: absolute; right: 64px; top: 58px; font: 500 22px/1 var(--mono); color: var(--bone-dim); letter-spacing: -0.02em; }
-  .demo { position: absolute; left: 64px; top: 150px; font-family: var(--mono); }
-  .demo pre { margin: 0 0 22px; font-size: 21px; line-height: 1.5; color: var(--ash); }
-  .demo mark { background: none; color: var(--cathode); text-shadow: var(--glint); }
-  .row { display: flex; align-items: flex-start; }
-  .cmd-line { margin: 12px 0 0; font-size: 47px; font-weight: 500; line-height: 1.1; letter-spacing: -0.04em; color: var(--bone); white-space: nowrap; }
-  .cmd-line i { display: inline-block; width: 2px; height: 0.74em; margin-left: 0.12em; background: var(--bone); }
-  .cands { margin-left: 16px; white-space: nowrap; }
-  .cands ul { list-style: none; margin: 0; padding: 0; font-size: 33px; font-weight: 300; line-height: 1.16; color: #10162a; -webkit-text-stroke: 1px #3a4a64; }
-  .cands p { margin: 3px 0 0; max-width: none; font-size: 34px; font-weight: 500; line-height: 1.1; letter-spacing: 0.015em; color: var(--cathode); text-shadow: var(--halo); }
-  .claim { position: absolute; left: 64px; bottom: 96px; margin: 0; font: 500 62px/1.05 var(--display); letter-spacing: 0.01em; color: var(--bone); }
-  .facts { position: absolute; left: 64px; bottom: 50px; margin: 0; max-width: none; font: 400 23px/1 var(--mono); letter-spacing: -0.03em; color: var(--bone); }
+  body { display: flex; flex-direction: column; justify-content: space-between; padding: 64px 72px 72px; }
+  .mark { font: 500 34px/1 var(--sans); letter-spacing: -0.04em; color: var(--graphite); display: flex; justify-content: space-between; align-items: baseline; }
+  .mark span { font: 400 22px/1 var(--sans); letter-spacing: -0.01em; color: var(--graphite-2); }
+  h1 { font: 500 74px/1.04 var(--sans); letter-spacing: -0.04em; max-width: 21ch; text-wrap: balance; margin: 0; }
+  .og-term { font-size: 30px; padding: 26px 34px; border-radius: 10px; }
+  .og-term .ln { white-space: pre; }
+  .og-term .caret { height: 1.2em; }
+  .og-term .caret::after { width: 3px; animation: none; }
 </style>
 </head>
 <body>
-  <img class="plate" src="../../site/assets/plates/gauze.webp" alt="">
-  <div class="mark">wisp</div>
-  <div class="where">lolabradora.github.io/wisp</div>
-  <div class="demo">
-<pre>$ kubectl get pods -n billing
-<mark>api-7d9f8b6c4-x2kqp</mark>      0/1  CrashLoopBackOff
-worker-5c8d7f9b6-mn4lz   1/1  Running</pre>
-    <div class="row">
-      <p class="cmd-line">$ kubectl logs -n billing api<i></i></p>
-      <div class="cands">
-        <ul><li>-worker-5c8d</li><li>-gateway</li><li>-api-v2</li></ul>
-        <p>-7d9f8b6c4-x2kqp</p>
-      </div>
+  <div class="mark">wisp <span>zsh · macOS · Linux · runs locally</span></div>
+  <h1>It finishes the names already on your screen.</h1>
+  <div class="term og-term">
+    <div class="scene has-out has-ghost">
+      <div class="ln prompt"><span class="cmd"><span class="live"><span class="ps">$</span> git checkout feat/p<i class="caret"></i><span class="ghost">ayments-refactor</span></span></span></div>
     </div>
   </div>
-  <p class="claim">It finishes the names already on your screen.</p>
-  <p class="facts">Ghost-text suggestions for zsh. The model runs on your machine.</p>
 </body>
 </html>

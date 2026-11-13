@@ -4,22 +4,46 @@
     "ignoreFiles": [],
     "ignoreValues": [
       {
-        "rule": "dark-glow",
-        "value": "*",
-        "files": [
-          "site/index.html"
-        ],
-        "createdAt": "2026-11-12T21:50:37.230Z",
-        "reason": "DESIGN.md Filament Rule: the tube halo on struck cathode text is the approved signature of the committed world (brief: keep the identity)"
+        "rule": "overused-font",
+        "value": "geist mono",
+        "createdAt": "2026-11-13T08:22:27.245Z",
+        "reason": "Lead decision: Geist Mono only inside terminal and code surfaces"
       },
       {
-        "rule": "dark-glow",
+        "rule": "cream-palette",
         "value": "*",
         "files": [
-          "site/assets/style.css"
+          "site/**"
         ],
-        "createdAt": "2026-11-12T21:50:37.260Z",
-        "reason": "DESIGN.md Filament Rule: the tube halo on struck cathode text is the approved signature of the committed world (brief: keep the identity)"
+        "createdAt": "2026-11-13T08:22:29.576Z",
+        "reason": "HEYLOLA brand pins warm paper #f5f1ea (LANDING-V2 brief)"
+      },
+      {
+        "rule": "cream-palette",
+        "value": "*",
+        "files": [
+          ".impeccable/og/**"
+        ],
+        "createdAt": "2026-11-13T08:29:08.198Z",
+        "reason": "OG card uses the HEYLOLA paper ground"
+      },
+      {
+        "rule": "oversized-h1",
+        "value": "*",
+        "files": [
+          ".impeccable/og/**"
+        ],
+        "createdAt": "2026-11-13T08:29:08.222Z",
+        "reason": "1200x630 social card: the headline is the card"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "30px",
+        "files": [
+          ".impeccable/og/**"
+        ],
+        "createdAt": "2026-11-13T08:33:20.717Z",
+        "reason": "OG card renders the terminal at social-preview scale"
       }
     ]
   }

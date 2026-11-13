@@ -59,7 +59,7 @@ wisp reads the terminal output above the prompt and completes names that just ap
 ## Brand Commitments
 
 - The name is **wisp**, always lowercase.
-- The visual identity is "Struck Cathode Gauze", recorded in DESIGN.md: ink plane, bronze gauze plate, cathode orange for the struck value. There is no drawn logo; the wordmark is the lowercase name.
+- The visual identity follows the HEYLOLA design system, recorded in DESIGN.md: warm paper, graphite text, Hanken Grotesk, and one amber accent for what is lit (caret, focus, the highlighted source name). Light only. There is no drawn logo; the wordmark is the lowercase name.
 - Made by HEYLOLA. MIT licensed.
 
 ## Evidence on Hand

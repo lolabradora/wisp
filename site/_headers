@@ -8,9 +8,6 @@
 /
   Cache-Control: public, max-age=0, must-revalidate
 
-/assets/plates/*
-  Cache-Control: public, max-age=86400
-
 /assets/style.css
   Cache-Control: public, max-age=86400
 

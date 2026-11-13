@@ -1,4 +1,4 @@
 {
-  "prompt": "Not generated. Rendered from .impeccable/og/og.html (the hero composition on the gauze plate, using site/assets/style.css tokens and fonts) at 1200x630 with headless Chrome: --headless --force-device-scale-factor=1 --window-size=1200,630 --screenshot=site/assets/og.png, served over a local HTTP server from the repo root.\n",
-  "createdAt": "2026-11-12T21:55:00.000Z"
+  "prompt": "Not generated. Rendered from .impeccable/og/og.html (paper ground, the hero headline and one light terminal line with grey ghost text, using site/assets/style.css tokens and fonts) at 1200x630 with headless Chrome: --headless=new --force-device-scale-factor=1 --window-size=1200,630 --screenshot, served over a local HTTP server from the repo root, then palette-reduced with ImageMagick (-colors 128 PNG8).\n",
+  "createdAt": "2026-11-13T10:20:00.000Z"
 }
