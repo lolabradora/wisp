@@ -8,7 +8,7 @@ web
 
 ## Stack
 
-Static HTML/CSS/JS in `site/`, no build step and no dependencies. It is served by GitHub Pages at `https://lolabradora.github.io/wisp/`, a sub-path, so every asset and link URL in `site/` is relative. The page makes no external requests and runs under a strict CSP (`site/_headers`): no inline scripts or styles.
+Static HTML/CSS/JS in `site/`, no build step and no dependencies. It is served by GitHub Pages at `https://wisp.heylola.ro/` (custom domain; DNS in Cloudflare as a DNS-only CNAME to `lolabradora.github.io`). Asset and link URLs in `site/` stay relative, so the page also works from any sub-path. The page makes no external requests and runs under a strict CSP (`site/_headers`): no inline scripts or styles.
 
 ## Users
 

@@ -19,4 +19,4 @@
 
 - [[Contributing]]
 - [Repository](https://github.com/lolabradora/wisp)
-- [Landing page](https://lolabradora.github.io/wisp/)
+- [Landing page](https://wisp.heylola.ro/)
