@@ -199,6 +199,36 @@
       <p class="keys">Press <kbd class="keycap"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h9.5M8.5 4l4 4-4 4"/></svg><span class="sr-only">the right arrow key</span></kbd> to accept. <kbd class="keycap"><span class="keycap-text">Alt</span></kbd><span class="plus">+</span><kbd class="keycap"><span class="keycap-text">F</span></kbd> takes one word.</p>
     </section>
 
+    <!-- S3b · Long commands -->
+    <section class="long" aria-labelledby="long-title">
+      <header class="head">
+        <h2 id="long-title" class="h2">Long commands, put together for you.</h2>
+        <p class="body">It takes the name from your screen and the flags from what you ran before.</p>
+      </header>
+      <figure class="demo long-demo">
+        <div class="term" data-loop role="img" aria-label="Demo: an earlier aws logs tail command for billing-webhook is on screen, followed by a list of log groups that includes billing-invoice-sync. Typing aws logs tail /aws/lambda/billing-i, wisp suggests the rest: billing-invoice-sync with the same --since 30m --follow --format short --profile prod flags as the earlier command.">
+          <div class="scene has-out has-ghost has-key" data-scene data-latency="224" aria-hidden="true">
+            <div class="ln c"><span class="ps">$</span> aws logs tail /aws/lambda/billing-webhook <span class="src alt">--since 30m --follow --format short --profile prod</span></div>
+            <div class="ln">2026-11-13T09:41:07 START RequestId: 7f3c2e1a Version: $LATEST</div>
+            <div class="ln c"><span class="ps">$</span> aws logs describe-log-groups --output text</div>
+            <div class="ln"><span class="src">/aws/lambda/billing-invoice-sync</span>  /aws/lambda/billing-webhook  /ecs/checkout-api</div>
+            <div class="ln prompt">
+              <span class="cmd">
+                <span class="live"><span class="ps">$</span> <span class="typed">aws logs tail /aws/lambda/billing-i</span><i class="caret"></i><span class="ghost">nvoice-sync --since 30m --follow --format short --profile prod</span></span>
+                <span class="done"><span class="ps">$</span> aws logs tail /aws/lambda/billing-invoice-sync --since 30m --follow --format short --profile prod<i class="caret"></i></span>
+              </span>
+              <kbd class="key"><svg viewBox="0 0 16 16"><path d="M3 8h9.5M8.5 4l4 4-4 4"/></svg></kbd>
+            </div>
+          </div>
+        </div>
+        <figcaption class="legend">
+          <span><i class="sw"></i>Name from the screen</span>
+          <span><i class="sw alt"></i>Flags from an earlier command</span>
+          <span class="legend-note">Recorded with Qwen2.5-Coder 1.5B on an Apple M4 Pro: 224&nbsp;ms.</span>
+        </figcaption>
+      </figure>
+    </section>
+
     <!-- S4 · Works in your terminal -->
     <section class="terminals" aria-labelledby="terminals-title">
       <h2 id="terminals-title" class="h2">Works in the terminal you have.</h2>

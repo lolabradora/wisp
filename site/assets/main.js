@@ -69,6 +69,7 @@
       this.typed = el.querySelector(".typed");
       this.text = this.typed.textContent;
       this.hasSrc = !!el.querySelector(".src");
+      this.latency = Number(el.dataset.latency) || 80; // recorded model latency, cached prompt
       this.accepted = false;
       el.querySelectorAll(".ln").forEach((ln, i) => ln.style.setProperty("--i", i));
     }
@@ -112,7 +113,7 @@
           await wait(jitter(), signal);
         }
         this.set("is-typing", false);
-        await wait(140, signal); // 60 ms pause + ~80 ms cached model latency
+        await wait(60 + this.latency, signal); // typing pause + model latency
       } else {
         await wait(900 * pace, signal); // empty prompt: the caret idles, then the prediction lands
       }
@@ -160,9 +161,8 @@
   }
   const runner = (script) => { const r = new Runner(script); runners.push(r); return r; };
 
-  // Hero: loops through its scenes forever (while in view and not paused).
-  const loopEl = document.querySelector("[data-loop]");
-  if (loopEl) {
+  // Looping demos (hero, long commands): cycle through their scenes while in view and not paused.
+  document.querySelectorAll("[data-loop]").forEach((loopEl) => {
     const scenes = [...loopEl.querySelectorAll("[data-scene]")].map((el) => new Scene(el));
     let idx = 0;
     const show = (i) => scenes.forEach((s, j) => s.set("is-off", j !== i));
@@ -203,7 +203,7 @@
       if (e.intersectionRatio >= 0.5) hero.want(true);
       else if (!e.isIntersecting) hero.want(false);
     }, { threshold: [0, 0.5] }).observe(loopEl);
-  }
+  });
 
   // One-shot scene: plays once when shown, then stays settled.
   // Its output is already on screen, so a waiting panel is never an empty box.
